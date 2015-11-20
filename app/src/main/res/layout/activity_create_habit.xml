@@ -1,0 +1,299 @@
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="?attr/colorPrimary"
+    tools:context=".MainActivity">
+
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <include
+            android:id="@+id/toolbar"
+            layout="@layout/toolbar"/>
+
+    </android.support.design.widget.AppBarLayout>
+
+
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:measureAllChildren="true"
+        android:fillViewport="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/create_habit_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="7dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <com.blakit.petrenko.habits.view.FontTextView
+                        style="@style/CreateTheme.Header"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="@string/create_habit_common"/>
+
+                    <com.blakit.petrenko.habits.view.FontTextView
+                        style="@style/CreateTheme.Normal.Font"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/create_habit_name"/>
+
+                    <EditText
+                        android:id="@+id/create_habit_name"
+                        style="@style/EditTextTheme.Size"
+                        android:theme="@style/EditTextTheme"
+                        android:maxLength="30"
+                        android:maxLines="1"/>
+
+                    <com.blakit.petrenko.habits.view.FontTextView
+                        style="@style/CreateTheme.Normal.Font"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/create_habit_description"/>
+
+                    <EditText
+                        android:id="@+id/create_habit_description"
+                        style="@style/EditTextTheme.Size"
+                        android:theme="@style/EditTextTheme"/>
+
+                    <CheckBox
+                        android:id="@+id/create_habit_send_checkbox"
+                        style="@style/CheckBoxTheme.Size"
+                        android:theme="@style/CheckBoxTheme"
+                        android:text="@string/create_habit_publish"
+                        android:textAppearance="@style/CreateTheme.Normal"/>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="2dp"
+                        android:background="@color/md_grey_300"/>
+
+                    <com.blakit.petrenko.habits.view.FontTextView
+                        style="@style/CreateTheme.Header"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="@string/create_habit_actions"/>
+
+                    <com.blakit.petrenko.habits.view.FontTextView
+                        style="@style/CreateTheme.Normal.Font"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/create_habit_actions_default" />
+
+                    <EditText
+                        android:id="@+id/create_habit_actions_default"
+                        style="@style/EditTextTheme.Size"
+                        android:theme="@style/EditTextTheme"
+                        android:saveEnabled="false"/>
+
+
+
+                    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:id="@+id/create_habit_actions_details_header">
+
+                        <com.blakit.petrenko.habits.view.FontTextView
+                            style="@style/CreateTheme.Normal.Font"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingTop="6dp"
+                            android:paddingBottom="10dp"
+                            android:text="@string/create_habit_actions_details"/>
+
+                        <com.mikepenz.iconics.view.IconicsImageView
+                            android:id="@+id/create_habit_actions_arrow"
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
+                            app:iiv_color="@color/md_grey_600"
+                            android:layout_alignParentRight="true"
+                            android:layout_marginRight="18dp"
+                            android:layout_marginTop="10dp" />
+
+                    </RelativeLayout>
+
+
+                    <LinearLayout
+                        android:id="@+id/create_habit_actions_details"
+                        android:orientation="vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="2dp"
+                        android:background="@color/md_grey_300"/>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <com.blakit.petrenko.habits.view.FontTextView
+                            android:id="@+id/create_habit_videos_title"
+                            style="@style/CreateTheme.Header"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:text="@string/create_habit_videos"/>
+
+                        <com.mikepenz.iconics.view.IconicsImageView
+                            android:id="@+id/create_habit_add_video"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            app:iiv_color="@color/md_grey_600"
+                            android:layout_alignParentRight="true"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginRight="14dp"/>
+
+                    </RelativeLayout>
+
+                    <LinearLayout
+                        android:id="@+id/create_habit_videos"
+                        android:orientation="vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:id="@+id/create_habit_video_non">
+
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/CreateTheme.Small"
+                            android:text="@string/create_habit_video_non"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginBottom="5dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/CreateTheme.Small"
+                            android:text="@string/create_habit_video_non_add"
+                            android:id="@+id/create_habit_video_non_add"
+                            android:layout_marginBottom="18dp"
+                            android:layout_gravity="center_horizontal" />
+
+                    </LinearLayout>
+
+                    <ProgressBar
+                        android:id="@+id/progressBar"
+                        style="?android:attr/progressBarStyleLarge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        android:indeterminateDrawable="@drawable/progress"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_margin="20dp"
+                        android:layout_marginBottom="18dp" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="2dp"
+                        android:background="@color/md_grey_300"/>
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <com.blakit.petrenko.habits.view.FontTextView
+                            style="@style/CreateTheme.Header"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:text="@string/create_habit_articles"/>
+
+                        <com.mikepenz.iconics.view.IconicsImageView
+                            android:id="@+id/create_habit_add_article"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            app:iiv_color="@color/md_grey_600"
+                            android:layout_alignParentRight="true"
+                            android:layout_marginRight="14dp"
+                            android:layout_marginTop="10dp" />
+
+                    </RelativeLayout>
+
+                    <LinearLayout
+                        android:id="@+id/create_habit_articles"
+                        android:orientation="vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:id="@+id/create_habit_article_non">
+
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/CreateTheme.Small"
+                            android:text="@string/create_habit_article_non"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginBottom="5dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/CreateTheme.Small"
+                            android:text="@string/create_habit_article_non_add"
+                            android:id="@+id/create_habit_article_non_add"
+                            android:layout_marginBottom="18dp"
+                            android:layout_gravity="center_horizontal" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </android.support.v7.widget.CardView>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="42dp" />
+
+        </LinearLayout>
+
+
+    </android.support.v4.widget.NestedScrollView>
+
+    <android.support.design.widget.FloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:fabSize="normal"
+        app:elevation="4dp"
+        app:backgroundTint="@color/colorPrimaryDark"
+        app:layout_anchor="@id/create_habit_card"
+        app:layout_anchorGravity="bottom|right|end"
+        android:id="@+id/create_habit_save"
+        />
+
+
+</android.support.design.widget.CoordinatorLayout>

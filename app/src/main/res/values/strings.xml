@@ -1,0 +1,62 @@
+<resources>
+    <string name="app_name">Habits</string>
+
+    <!-- Create habit -->
+    <string name="create_habit_common">Common</string>
+    <string name="create_habit_name">Habit name:</string>
+    <string name="create_habit_description">Description:</string>
+    <string name="create_habit_publish">Send to moderation</string>
+    <string name="create_habit_actions">Actions</string>
+    <string name="create_habit_actions_default">Default action:</string>
+    <string name="create_habit_actions_details">Each day separately</string>
+    <string name="create_habit_action_not_skipped"><u>The day is not skipped</u></string>
+    <string name="create_habit_action_skipped"><u>The day is skipped</u></string>
+    <string name="create_habit_videos">Videos</string>
+    <string name="create_habit_video_non">Video list is empty</string>
+    <string name="create_habit_video_non_add"><u>Add video</u></string>
+    <string name="create_habit_youtube_views">Views:</string>
+    <string name="create_habit_youtube_dialog_title">Add YouTube video</string>
+    <string name="create_habit_youtube_dialog_url_hint">URL or ID of YouTube video</string>
+    <string name="create_habit_youtube_dialog_invalid_url">Ivalid URL or ID of YouTube video!</string>
+    <string name="create_habit_youtube_dialog_warning_already_set">This video is already present!</string>
+    <string name="create_habit_youtube_dialog_failed_load"><u>Failed to load video. Try again</u></string>
+    <string name="create_habit_articles">Articles</string>
+    <string name="create_habit_article_non">Article list is empty</string>
+    <string name="create_habit_article_non_add"><u>Add article</u></string>
+    <string name="create_habit_article_dialog_title">Add article</string>
+    <string name="create_habit_youtube_article_url_hint">Url of article</string>
+    <string name="create_habit_youtube_article_name_hint">Article title</string>
+
+    <string name="create_habit_save_error_dialog_title">Unable to save the habit</string>
+    <string name="create_habit_save_error_dialog_message">Not enough data. Fill in all the fields!</string>
+
+    <!-- Navmenu items -->
+    <string name="nav_menu_item_addhabit">Add habit</string>
+    <string name="nav_menu_item_myhabits">My habits</string>
+    <string name="nav_menu_item_complete">Complete habits</string>
+    <string name="nav_menu_item_create">Create habit</string>
+    <string name="nav_menu_item_profile">Profile</string>
+    <string name="nav_menu_item_settings">Settings</string>
+    <string name="nav_menu_item_help">Help</string>
+    <string name="nav_menu_item_info">About Us</string>
+    <string name="nav_manu_item_add_account">Add account</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="main_activity_exit_toast">Press back again to exit</string>
+
+    <string name="title_activity_create_habit">Create habit</string>
+
+    <!-- Commons -->
+    <string name="hello_world">Hello world!</string>
+    <string name="done">Done</string>
+    <string name="day">Day</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="exit_dialog_save_message">Data will be lost. Are you sure you want to exit?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="back_to_menu">Exit</string>
+    <string name="copy_link">Copy link</string>
+    <string name="share">Share...</string>
+    <string name="delete">Delete</string>
+</resources>

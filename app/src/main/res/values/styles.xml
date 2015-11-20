@@ -1,0 +1,102 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="AppTheme.Base"/>
+
+    <style name="AppTheme.Base" parent="Theme.AppCompat">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:textColor">@color/textColor</item>
+        <item name="colorControlNormal">@color/md_white_1000</item>
+
+        <item name="popupMenuStyle">@style/PopupMenuStyle</item>
+        <item name="android:popupMenuStyle">@style/PopupMenuStyle</item>
+
+
+        <!-- MaterialDrawer specific values -->
+        <item name="material_drawer_primary_text">@color/textColor</item>
+        <item name="material_drawer_secondary_text">@color/textColor</item>
+        <item name="material_drawer_selected_text">@color/selectedTextColor</item>
+
+    </style>
+
+    <style name="CreateTheme.Header" parent="TextAppearance.AppCompat.Large">
+        <item name="android:textColor">@color/md_grey_600</item>
+        <item name="font">OpenSans-Semibold</item>
+        <item name="android:paddingLeft">18dp</item>
+        <item name="android:paddingRight">18dp</item>
+        <item name="android:layout_marginTop">7dp</item>
+        <item name="android:layout_marginBottom">7dp</item>
+    </style>
+
+    <style name="CreateTheme.Normal" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:textColor">@color/textColor</item>
+        <item name="android:paddingLeft">18dp</item>
+        <item name="android:paddingTop">10dp</item>
+    </style>
+    <style name="CreateTheme.Normal.Font" parent="CreateTheme.Normal">
+        <item name="android:paddingTop">0dp</item>
+        <item name="font">OpenSans-Light</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="CreateTheme.Small" parent="TextAppearance.AppCompat.Small">
+        <item name="android:textColor">@color/createActionsSmallTextColor</item>
+        <item name="android:paddingTop">10dp</item>
+    </style>
+
+    <style name="CreateTheme.Small.Youtube" parent="CreateTheme.Small">
+        <item name="android:paddingTop">3dp</item>
+    </style>
+
+    <style name="EditTextTheme">
+        <item name="android:textColor">@color/textColor</item>
+        <item name="android:textColorPrimary">@color/textColor</item>
+        <item name="colorControlActivated">@color/headerBackground</item>
+        <item name="colorControlHighlight">@color/headerBackground</item>
+        <item name="android:background">@drawable/edit_text_back</item>
+    </style>
+
+    <style name="EditTextTheme.Size">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_margin">14dp</item>
+        <item name="android:padding">8dp</item>
+    </style>
+
+    <style name="CheckBoxTheme">
+        <item name="android:textColor">@color/textColor</item>
+        <item name="colorControlActivated">@color/colorPrimaryDark</item>
+        <item name="colorControlNormal">@color/createActionsSmallTextColor</item>
+    </style>
+
+    <style name="CheckBoxTheme.Size">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_margin">14dp</item>
+    </style>
+
+    <style name="PopupMenuStyle" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:popupBackground">@color/md_grey_200</item>
+    </style>
+
+
+    <style name="AlertDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowTitleStyle">@style/AlertDialogWindowTitle</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
+        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
+    </style>
+    <style name="AlertDialogWindowTitle">
+        <item name="android:maxLines">1</item>
+        <item name="android:textAppearance">@style/TextAppearance.AlertTitle</item>
+    </style>
+    <style name="TextAppearance.AlertTitle" parent="TextAppearance.AppCompat.Large">
+        <item name="android:textColor">@color/md_white_1000</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+</resources>
