@@ -1,45 +1,44 @@
 package com.blakit.petrenko.habits.model;
 
-import com.j256.ormlite.field.DataType;
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
+import org.parceler.Parcel;
 
 import java.io.Serializable;
+import java.util.UUID;
+
+import io.realm.ActionRealmProxy;
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by user_And on 07.08.2015.
  */
-@DatabaseTable(tableName = "actions")
-public class Action implements Serializable {
+@Parcel(implementations = {ActionRealmProxy.class},
+        value = Parcel.Serialization.BEAN,
+        analyze = {Action.class})
+public class Action extends RealmObject {
 
-    @DatabaseField(generatedId = true)
-    private long id;
-
-    @DatabaseField(dataType = DataType.STRING, canBeNull = false)
+    @PrimaryKey
+    private String id;
     private String action;
-
-    @DatabaseField(dataType = DataType.INTEGER)
     private int day;
-
-    @DatabaseField(dataType = DataType.BOOLEAN)
     private boolean isSkipped;
 
-    @DatabaseField(foreign = true, foreignAutoCreate = true, foreignAutoRefresh = true, columnName = "habit_id")
-    private transient Habit habit;
-
-    Action() {}
+    public Action() {
+        this.id = UUID.randomUUID().toString();
+    }
 
     public Action(String action, int day) {
+        this.id = UUID.randomUUID().toString();
         this.action = action;
         this.day = day;
         this.isSkipped = false;
     }
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -67,11 +66,4 @@ public class Action implements Serializable {
         this.isSkipped = isSkipped;
     }
 
-    public Habit getHabit() {
-        return habit;
-    }
-
-    public void setHabit(Habit habit) {
-        this.habit = habit;
-    }
 }

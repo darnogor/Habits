@@ -54,7 +54,8 @@ public class HabitAdapter extends RecyclerView.Adapter<HabitAdapter.HabitViewHol
 
 //        holder.dayImage.setImageResource(R.drawable.circle_mask);
         holder.name.setText(curHabitDetails.getHabit().getName());
-        holder.action.setText(curHabitDetails.getTodayAction());
+        holder.action.setText(curHabitDetails.getHabit().getActions()
+                .get(curHabitDetails.getCurrentDay()).getAction());
         holder.checkBox.setChecked(curHabitDetails.isChecked());
         if(curHabitDetails.isChecked()) {
             holder.bottomBlock.setCardBackgroundColor(context.getResources()

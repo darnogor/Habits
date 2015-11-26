@@ -1,66 +1,54 @@
 package com.blakit.petrenko.habits.model;
 
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
-import android.os.Parcel;
-import android.os.Parcelable;
 
 import com.google.api.client.util.DateTime;
-import com.j256.ormlite.field.DataType;
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
 
-import java.io.Serializable;
+import org.parceler.Parcel;
+
 import java.math.BigInteger;
+import java.util.UUID;
+
+import io.realm.RealmObject;
+import io.realm.VideoItemRealmProxy;
+import io.realm.annotations.Ignore;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by user_And on 07.08.2015.
  */
-@DatabaseTable(tableName = "videos")
-public class VideoItem implements Parcelable{
+@Parcel(implementations = { VideoItemRealmProxy.class },
+        value = org.parceler.Parcel.Serialization.BEAN,
+        analyze = { VideoItem.class })
+public class VideoItem extends RealmObject {
 
-    @DatabaseField(generatedId = true)
-    private long id;
-
-    @DatabaseField(dataType = DataType.STRING)
+    @PrimaryKey
+    private String id;
     private String videoId;
-
-    @DatabaseField(foreign = true, foreignAutoRefresh = true, columnName = "habit_id")
-    private Habit habit;
 
     private String title;
     private String chanel;
-    private DateTime publishDate;
-    private BigInteger viewsCount;
-
+    private String publishDate;
+    private String viewsCount;
     private String duration;
     private String thumbnailURL;
+    @Ignore
     private Bitmap thumbnail;
 
-    VideoItem() {}
-
-    public VideoItem(String id, Habit habit) {
-        this.videoId = id;
-        this.habit = habit;
+    public VideoItem() {
+        this.id = UUID.randomUUID().toString();
     }
 
-    public VideoItem(Parcel source) {
-        videoId = source.readString();
-        habit = source.readParcelable(Habit.class.getClassLoader());
-        title = source.readString();
-        chanel = source.readString();
-        publishDate = (DateTime) source.readSerializable();
-        viewsCount = (BigInteger) source.readSerializable();
-        duration = source.readString();
-        thumbnailURL = source.readString();
-        thumbnail = source.readParcelable(Bitmap.class.getClassLoader());
+    public VideoItem(String videoId) {
+        this.id = UUID.randomUUID().toString();
+        this.videoId = videoId;
     }
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -70,14 +58,6 @@ public class VideoItem implements Parcelable{
 
     public void setVideoId(String id) {
         this.videoId = id;
-    }
-
-    public Habit getHabit() {
-        return habit;
-    }
-
-    public void setHabit(Habit habit) {
-        this.habit = habit;
     }
 
     public String getTitle() {
@@ -96,19 +76,19 @@ public class VideoItem implements Parcelable{
         this.chanel = chanel;
     }
 
-    public DateTime getPublishDate() {
+    public String getPublishDate() {
         return publishDate;
     }
 
-    public void setPublishDate(DateTime publishDate) {
+    public void setPublishDate(String publishDate) {
         this.publishDate = publishDate;
     }
 
-    public BigInteger getViewsCount() {
+    public String getViewsCount() {
         return viewsCount;
     }
 
-    public void setViewsCount(BigInteger viewsCount) {
+    public void setViewsCount(String viewsCount) {
         this.viewsCount = viewsCount;
     }
 
@@ -136,33 +116,4 @@ public class VideoItem implements Parcelable{
         this.thumbnail = thumbnail;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(videoId);
-        dest.writeParcelable(habit, flags);
-        dest.writeString(title);
-        dest.writeString(chanel);
-        dest.writeSerializable(publishDate);
-        dest.writeSerializable(viewsCount);
-        dest.writeString(duration);
-        dest.writeString(thumbnailURL);
-        dest.writeParcelable(thumbnail, flags);
-    }
-
-    public static Creator<VideoItem> CREATOR = new Creator<VideoItem>() {
-        @Override
-        public VideoItem createFromParcel(Parcel source) {
-            return new VideoItem(source);
-        }
-
-        @Override
-        public VideoItem[] newArray(int size) {
-            return new VideoItem[size];
-        }
-    };
 }

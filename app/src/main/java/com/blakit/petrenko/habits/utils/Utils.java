@@ -3,12 +3,15 @@ package com.blakit.petrenko.habits.utils;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.v4.net.ConnectivityManagerCompat;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 
 import com.blakit.petrenko.habits.HabitApplication;
+import com.blakit.petrenko.habits.model.Action;
+import com.blakit.petrenko.habits.model.Habit;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -81,6 +84,15 @@ public class Utils {
             String str = matcher.group();
             Log.d("PARSING OF YOUTUBE URL", str);
             return str;
+        }
+        return null;
+    }
+
+    public static Action getAction(@NonNull Habit habit, int day) {
+        for (Action a: habit.getActions()) {
+            if (a.getDay() == day) {
+                return a;
+            }
         }
         return null;
     }

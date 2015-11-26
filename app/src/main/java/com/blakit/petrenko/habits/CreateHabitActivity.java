@@ -46,6 +46,7 @@ import com.blakit.petrenko.habits.utils.Utils;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.youtube.player.YouTubeStandalonePlayer;
+import com.google.android.youtube.player.internal.ac;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -60,16 +61,18 @@ import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.iconics.view.IconicsImageView;
 
+import org.joda.time.Period;
+import org.joda.time.format.ISOPeriodFormat;
+import org.joda.time.format.PeriodFormatter;
+import org.parceler.Parcels;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class CreateHabitActivity extends AppCompatActivity {
 
@@ -131,7 +134,7 @@ public class CreateHabitActivity extends AppCompatActivity {
                 .create();
 
         if(savedInstanceState != null) {
-            habit = savedInstanceState.getParcelable("habit");
+            habit = Parcels.unwrap(savedInstanceState.getParcelable("habit"));
             defaultAction = savedInstanceState.getString("default_action");
             isDefaults = savedInstanceState.getBooleanArray("is_defaults");
             addVideoDialog.setText(savedInstanceState.getString("add_video_dialog_text"));
@@ -400,7 +403,7 @@ public class CreateHabitActivity extends AppCompatActivity {
                     setErrorBackground(descEdit);
                 }
                 for (int i = 0; i < ids.length; ++i) {
-                    if (!habit.getAction(i).isSkipped()) {
+                    if (!Utils.getAction(habit, i+1).isSkipped()) {
                         EditText e = (EditText) findViewById(ids[i]);
                         if (TextUtils.isEmpty(defaultAction) &&
                                 TextUtils.isEmpty(e.getText().toString())) {
@@ -414,12 +417,10 @@ public class CreateHabitActivity extends AppCompatActivity {
                     setErrorBackground(defaultActions);
                 }
                 if (isInputOK) {
-                    try {
-                        HabitDao habitDao = HabitApplication.getInstance().getDbOpenHelper().getHabitDao();
-                        habitDao.createOrUpdate(habit);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+                    HabitDao habitDao = HabitApplication.getInstance().getHabitDao();
+                    habitDao.createOrUpdate(habit);
+                    isDataChanged = false;
+                    onBackPressed();
                 } else {
                     saveDialog.show();
                     int color = ContextCompat.getColor(CreateHabitActivity.this, R.color.md_grey_600);
@@ -518,11 +519,13 @@ public class CreateHabitActivity extends AppCompatActivity {
                 .append(position + 1)
                 .toString());
 
+        Action action = Utils.getAction(habit, position+1);
+
         ids[position] = Utils.generateViewId();
         dayEditText.setId(ids[position]);
-        dayEditText.setText(habit.getAction(position).getAction());
+        dayEditText.setText(action.getAction());
 
-        if (!habit.getAction(position).isSkipped()) {
+        if (!action.isSkipped()) {
             checked.setIcon(GoogleMaterial.Icon.gmd_check_circle);
             checked.setColorRes(R.color.colorPrimaryDark);
             skippedTextView.setText(R.string.create_habit_action_not_skipped);
@@ -535,7 +538,7 @@ public class CreateHabitActivity extends AppCompatActivity {
         skippedTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Action action = habit.getAction(position);
+                Action action = Utils.getAction(habit, position + 1);
 
                 if (!action.isSkipped()) {
                     action.setIsSkipped(true);
@@ -582,7 +585,7 @@ public class CreateHabitActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 isDataChanged = true;
-                habit.getAction(position).setAction(s.toString());
+                Utils.getAction(habit, position + 1).setAction(s.toString());
                 if (!defaultAction.equals(s.toString())) {
                     isDefaults[position] = false;
                 }
@@ -614,7 +617,7 @@ public class CreateHabitActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putParcelable("habit", habit);
+        outState.putParcelable("habit", Parcels.wrap(Habit.class, habit));
         outState.putString("default_action", defaultAction);
         outState.putBooleanArray("is_defaults", isDefaults);
         outState.putBoolean("is_add_video_dialog_shown", addVideoDialog.isShowing());
@@ -634,7 +637,7 @@ public class CreateHabitActivity extends AppCompatActivity {
             exitDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(color);
         } else {
             super.onBackPressed();
-            overridePendingTransition(R.anim.nothing, R.anim.exit_to_right);
+            overridePendingTransition(R.anim.enter_from_left_half, R.anim.exit_to_right);
         }
     }
 
@@ -746,8 +749,8 @@ public class CreateHabitActivity extends AppCompatActivity {
 
                         videoItem.setTitle(video.getSnippet().getTitle());
                         videoItem.setChanel(video.getSnippet().getChannelId());
-                        videoItem.setPublishDate(video.getSnippet().getPublishedAt());
-                        videoItem.setViewsCount(video.getStatistics().getViewCount());
+                        videoItem.setPublishDate(video.getSnippet().getPublishedAt().toString());
+                        videoItem.setViewsCount(video.getStatistics().getViewCount().toString());
                         videoItem.setDuration(video.getContentDetails().getDuration());
 
                         String url = video.getSnippet().getThumbnails().getMedium().getUrl();
@@ -762,7 +765,7 @@ public class CreateHabitActivity extends AppCompatActivity {
                         }
                         Log.d("Title", videoItem.getTitle());
                         Log.d("Channel", videoItem.getChanel());
-                        Log.d("Publish Date", videoItem.getPublishDate().toString());
+                        Log.d("Publish Date", videoItem.getPublishDate());
                         Log.d("Views count", videoItem.getViewsCount().toString());
                         Log.d("Duration", videoItem.getDuration());
                         Log.d("Thumbnail URL", videoItem.getThumbnailURL());
@@ -820,23 +823,25 @@ public class CreateHabitActivity extends AppCompatActivity {
             thumbnailView.setImageBitmap(videoItem.getThumbnail());
 
 
-            Matcher matcher = Pattern.compile("\\d+").matcher(videoItem.getDuration());
+            PeriodFormatter formatter = ISOPeriodFormat.standard();
+            Period p = formatter.parsePeriod(videoItem.getDuration());
             StringBuilder builder = new StringBuilder();
-            while (matcher.find()) {
-                String s = matcher.group();
-                if (s.length() < 2) {
-                    builder.append('0');
-                }
-                builder.append(s);
-                builder.append(':');
+            if (p.toStandardHours().getHours() > 0) {
+                builder.append(p.toStandardHours().getHours());
+                builder.append(":");
             }
-            if (builder.charAt(0) == '0') {
-                builder.deleteCharAt(0);
+            if (p.getMinutes() < 10) {
+                builder.append("0");
             }
-            builder.deleteCharAt(builder.length() - 1);
+            builder.append(p.getMinutes());
+            builder.append(":");
+            if (p.getSeconds() < 10) {
+                builder.append("0");
+            }
+            builder.append(p.getSeconds());
             durationView.setText(builder);
 
-            String num = videoItem.getViewsCount().toString();
+            String num = videoItem.getViewsCount();
             builder.setLength(0);
             builder.append(num);
             for (int i = num.length()-3; i > 0; i -= 3) {
@@ -1077,12 +1082,12 @@ public class CreateHabitActivity extends AppCompatActivity {
                             return null;
                         } else {
                             Video video = videos.get(0);
-                            VideoItem videoItem = new VideoItem(params[0], habit);
+                            VideoItem videoItem = new VideoItem(params[0]);
 
                             videoItem.setTitle(video.getSnippet().getTitle());
                             videoItem.setChanel(video.getSnippet().getChannelId());
-                            videoItem.setPublishDate(video.getSnippet().getPublishedAt());
-                            videoItem.setViewsCount(video.getStatistics().getViewCount());
+                            videoItem.setPublishDate(video.getSnippet().getPublishedAt().toString());
+                            videoItem.setViewsCount(video.getStatistics().getViewCount().toString());
                             videoItem.setDuration(video.getContentDetails().getDuration());
 
                             String url = video.getSnippet().getThumbnails().getMedium().getUrl();
@@ -1097,7 +1102,7 @@ public class CreateHabitActivity extends AppCompatActivity {
                             }
                             Log.d("Title", videoItem.getTitle());
                             Log.d("Channel", videoItem.getChanel());
-                            Log.d("Publish Date", videoItem.getPublishDate().toString());
+                            Log.d("Publish Date", videoItem.getPublishDate());
                             Log.d("Views count", videoItem.getViewsCount().toString());
                             Log.d("Duration", videoItem.getDuration());
                             Log.d("Thumbnail URL", videoItem.getThumbnailURL());
@@ -1112,7 +1117,7 @@ public class CreateHabitActivity extends AppCompatActivity {
 
                 @Override
                 protected void onPostExecute(VideoItem videoItem) {
-                    Log.d("Load task","onPostExecute start");
+                    Log.d("Load task", "onPostExecute start");
                     progress.setVisibility(View.GONE);
                     if (videoItem == null) {
                         warningTextView.setText(R.string.create_habit_youtube_dialog_failed_load);
@@ -1128,24 +1133,26 @@ public class CreateHabitActivity extends AppCompatActivity {
                     thumbnailView.getLayoutParams().width = width;
                     thumbnailView.setImageBitmap(videoItem.getThumbnail());
 
-
-                    Matcher matcher = Pattern.compile("\\d+").matcher(videoItem.getDuration());
+                    Log.d("Duration", videoItem.getDuration());
+                    PeriodFormatter formatter = ISOPeriodFormat.standard();
+                    Period p = formatter.parsePeriod(videoItem.getDuration());
                     StringBuilder builder = new StringBuilder();
-                    while (matcher.find()) {
-                        String s = matcher.group();
-                        if (s.length() < 2) {
-                            builder.append('0');
-                        }
-                        builder.append(s);
-                        builder.append(':');
+                    if (p.toStandardHours().getHours() > 0) {
+                        builder.append(p.toStandardHours().getHours());
+                        builder.append(":");
                     }
-                    if (builder.charAt(0) == '0') {
-                        builder.deleteCharAt(0);
+                    if (p.getMinutes() < 10) {
+                        builder.append("0");
                     }
-                    builder.deleteCharAt(builder.length() - 1);
+                    builder.append(p.getMinutes());
+                    builder.append(":");
+                    if (p.getSeconds() < 10) {
+                        builder.append("0");
+                    }
+                    builder.append(p.getSeconds());
                     durationView.setText(builder);
 
-                    String num = videoItem.getViewsCount().toString();
+                    String num = videoItem.getViewsCount();
                     builder.setLength(0);
                     builder.append(num);
                     for (int i = num.length()-3; i > 0; i -= 3) {
@@ -1188,6 +1195,9 @@ public class CreateHabitActivity extends AppCompatActivity {
         private EditText urlInput;
         private EditText titleInput;
 
+        private TextView urlWarning;
+        private TextView titleWarning;
+
         protected AddArticleDialog() {
             CreateHabitActivity context = CreateHabitActivity.this;
 
@@ -1195,7 +1205,10 @@ public class CreateHabitActivity extends AppCompatActivity {
             View view = inflater.inflate(R.layout.add_article_dialog_create_habit, null, false);
 
             urlInput = (EditText) view.findViewById(R.id.create_habit_article_dialog_url);
-            titleInput = (EditText) view.findViewById(R.id.create_habit_article_dialog_name);
+            titleInput = (EditText) view.findViewById(R.id.create_habit_article_dialog_title);
+
+            urlWarning = (TextView) view.findViewById(R.id.create_habit_article_dialog_url_warning);
+            titleWarning = (TextView) view.findViewById(R.id.create_habit_article_dialog_title_warning);
 
 //            IconicsDrawable okDrawable = new IconicsDrawable(CreateHabitActivity.this)
 //                    .icon(GoogleMaterial.Icon.gmd_check_circle)
@@ -1210,7 +1223,7 @@ public class CreateHabitActivity extends AppCompatActivity {
 
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
-
+                    urlWarning.setVisibility(View.GONE);
                 }
 
                 @Override
@@ -1218,12 +1231,14 @@ public class CreateHabitActivity extends AppCompatActivity {
                     String uriStr = s.toString();
                     for (Article a: habit.getRelatedArticles()) {
                         if (a.getUri().equals(uriStr)) {
-                            //TODO: This article already present
+                            urlWarning.setText(R.string.create_habit_article_dialog_url_present);
+                            urlWarning.setVisibility(View.VISIBLE);
                             return;
                         }
                     }
                     if (!Utils.isUri(uriStr)) {
-                        //TODO: Invalid URL
+                        urlWarning.setText(R.string.create_habit_article_dialog_url_invalid);
+                        urlWarning.setVisibility(View.VISIBLE);
                         return;
                     }
                     if (article == null) {
@@ -1243,11 +1258,14 @@ public class CreateHabitActivity extends AppCompatActivity {
 
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
-
+                    titleWarning.setVisibility(View.GONE);
                 }
 
                 @Override
                 public void afterTextChanged(Editable s) {
+                    if (TextUtils.isEmpty(s.toString())) {
+                        titleWarning.setVisibility(View.VISIBLE);
+                    }
                     if (article != null) {
                         article.setTitle(s.toString());
                     }

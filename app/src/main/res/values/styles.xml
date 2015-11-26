@@ -14,6 +14,8 @@
         <item name="popupMenuStyle">@style/PopupMenuStyle</item>
         <item name="android:popupMenuStyle">@style/PopupMenuStyle</item>
 
+        <item name="android:windowIsTranslucent">true</item>
+
 
         <!-- MaterialDrawer specific values -->
         <item name="material_drawer_primary_text">@color/textColor</item>

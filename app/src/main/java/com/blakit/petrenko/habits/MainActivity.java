@@ -5,30 +5,28 @@ import android.accounts.AccountManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.transitions.everywhere.CircularPropagation;
-import android.transitions.everywhere.Explode;
-import android.transitions.everywhere.Transition;
-import android.transitions.everywhere.TransitionManager;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
 import android.widget.Toast;
 
+import com.blakit.petrenko.habits.dao.HabitDao;
+import com.blakit.petrenko.habits.dao.UserDao;
+import com.blakit.petrenko.habits.model.Action;
 import com.blakit.petrenko.habits.model.Habit;
 import com.blakit.petrenko.habits.model.HabitDetails;
 import com.blakit.petrenko.habits.model.User;
+import com.blakit.petrenko.habits.model.VideoItem;
+import com.blakit.petrenko.habits.utils.Resources;
 import com.blakit.petrenko.habits.view.AutofitGridRecyclerView;
 import com.blakit.petrenko.habits.view.MarginDecoration;
 import com.google.android.gms.auth.GoogleAuthException;
@@ -50,7 +48,6 @@ import com.mikepenz.materialdrawer.model.ProfileSettingDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,7 +56,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.sql.SQLException;
 import java.util.Collection;
 
 
@@ -92,6 +88,7 @@ public class MainActivity extends AppCompatActivity  {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Resources.getInstance().loadResources(this);
         setContentView(R.layout.activity_main);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -103,14 +100,6 @@ public class MainActivity extends AppCompatActivity  {
 
         initNavigationDrawer(toolbar, savedInstanceState);
 
-//        List<Habit> habits = new ArrayList<>();
-//        Habit h = new Habit("Name", "Action bla-bla-bla");
-//        habits.add(h);
-//        h = new Habit("Name 2", "Action 2");
-//        habits.add(h);
-//        h = new Habit("Name 42", "Action 42");
-//        habits.add(h);
-
 
         recyclerView = (AutofitGridRecyclerView) findViewById(R.id.recycler_view);
         recyclerView.addItemDecoration(new MarginDecoration(this));
@@ -119,13 +108,9 @@ public class MainActivity extends AppCompatActivity  {
         SharedPreferences main = getSharedPreferences("HabitAppPreferences", MODE_PRIVATE);
         String defaultAccount = main.getString("default_account", "");
         if (!TextUtils.isEmpty(defaultAccount)) {
-            try {
-                HabitApplication.getInstance().setCurrentUser(defaultAccount);
-                selectedAccountName = defaultAccount;
-                new RetrieveTokenTask().execute(selectedAccountName);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            HabitApplication.getInstance().setCurrentUser(defaultAccount);
+            selectedAccountName = defaultAccount;
+            new RetrieveTokenTask().execute(selectedAccountName);
             updateRecyclerView();
         } else {
             startChooseAccountActivity();
@@ -208,6 +193,9 @@ public class MainActivity extends AppCompatActivity  {
                         int id = iDrawerItem.getIdentifier();
                         switch (id) {
                             case NAV_MENU_ITEM_ADDHABITS:
+                                Intent addIntent = new Intent(MainActivity.this, AddHabitActivity.class);
+                                startActivity(addIntent);
+                                overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left_half);
                                 break;
                             case NAV_MENU_ITEM_MYHABITS:
                                 return false;
@@ -221,9 +209,9 @@ public class MainActivity extends AppCompatActivity  {
                                         intent.putExtra("mToken", mToken);
                                         intent.putExtra("accName", selectedAccountName);
                                         startActivity(intent);
-                                        overridePendingTransition(R.anim.enter_from_right, R.anim.nothing);
+                                        overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left_half);
                                     }
-                                }, 400);
+                                }, 350);
                                 return false;
                             case NAV_MENU_ITEM_PROFILE:
                                 break;
@@ -232,6 +220,21 @@ public class MainActivity extends AppCompatActivity  {
                             case NAV_MENU_ITEM_HELP:
                                 break;
                             case NAV_MENU_ITEM_INFO:
+                                UserDao userDao = HabitApplication.getInstance().getUserDao();
+                                User userByName = userDao.getUserByName(HabitApplication
+                                        .getInstance().getUser().getName());
+                                Log.d("!!!!User", userByName.getDisplayName());
+                                HabitDao habitDao = HabitApplication.getInstance().getHabitDao();
+                                for (Habit h: habitDao.getHabits()) {
+                                    Log.d("!!!!Habit: ", h.getId()+" name="+h.getName());
+                                    for (Action a: h.getActions()) {
+                                        Log.d("!!!!Action: ", a.getAction()+" day="+a.getDay());
+                                    }
+                                    for (VideoItem v: h.getRelatedVideoItems()) {
+                                        Log.d("!!!!Video: ", v.getTitle());
+                                    }
+                                }
+                                habitDao.clearAll();
                                 break;
                         }
                         return true;
@@ -289,17 +292,13 @@ public class MainActivity extends AppCompatActivity  {
         for (int i = 0; i < accounts.length; ++i) {
             String displayedName = null;
             Bitmap icon = null;
-            try {
-                User user = HabitApplication.getInstance().getDbOpenHelper()
-                        .getUserDao().getUserByName(accounts[i].name);
-                if (user != null) {
-                    displayedName = user.getDisplayName();
-                    if (user.getImgURL() != null) {
-                        icon = ImageLoader.getInstance().loadImageSync(user.getImgURL());
-                    }
+            User user = HabitApplication.getInstance()
+                    .getUserDao().getUserByName(accounts[i].name);
+            if (user != null) {
+                displayedName = user.getDisplayName();
+                if (user.getImgURL() != null) {
+                    icon = ImageLoader.getInstance().loadImageSync(user.getImgURL());
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
             }
             profiles[i] = new ProfileDrawerItem()
                     .withEmail(accounts[i].name)
@@ -345,43 +344,43 @@ public class MainActivity extends AppCompatActivity  {
     }
 
 
-    public void startActivityWithExplodeAnimation(int position, final float x, final float y,
-                      final Intent intent, long duration) {
-
-        Transition explode = new Explode();
-        explode.setEpicenterCallback(new Transition.EpicenterCallback() {
-            @Override
-            public Rect onGetEpicenter(Transition transition) {
-                return new Rect((int) x - 1, (int) y - 1, (int) x + 1, (int) y + 1);
-            }
-        });
-        explode.setPropagation(new CircularPropagation());
-        explode.setDuration(duration);
-        explode.setInterpolator(new AccelerateInterpolator());
-
-        TransitionManager.beginDelayedTransition(recyclerView, explode);
-
-//        List<Habit> elem = habits.subList(position, position + 1);
-//        recyclerView.setAdapter(new HabitAdapter(this, null));
-
-//        HabitAdapter adapter = (HabitAdapter) recyclerView.getAdapter();
-//        adapter.removeItemsBesidesPosition(position);
-
-        for (int i = habitsDetails.size()-1; i >= 0; --i) {
-            if (i != position)
-                recyclerView.removeViewAt(i);
-        }
-
-
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                startActivity(intent);
-                overridePendingTransition(0, 0);
-            }
-        }, duration);
-    }
+//    public void startActivityWithExplodeAnimation(int position, final float x, final float y,
+//                      final Intent intent, long duration) {
+//
+//        Transition explode = new Explode();
+//        explode.setEpicenterCallback(new Transition.EpicenterCallback() {
+//            @Override
+//            public Rect onGetEpicenter(Transition transition) {
+//                return new Rect((int) x - 1, (int) y - 1, (int) x + 1, (int) y + 1);
+//            }
+//        });
+//        explode.setPropagation(new CircularPropagation());
+//        explode.setDuration(duration);
+//        explode.setInterpolator(new AccelerateInterpolator());
+//
+//        TransitionManager.beginDelayedTransition(recyclerView, explode);
+//
+////        List<Habit> elem = habits.subList(position, position + 1);
+////        recyclerView.setAdapter(new HabitAdapter(this, null));
+//
+////        HabitAdapter adapter = (HabitAdapter) recyclerView.getAdapter();
+////        adapter.removeItemsBesidesPosition(position);
+//
+//        for (int i = habitsDetails.size()-1; i >= 0; --i) {
+//            if (i != position)
+//                recyclerView.removeViewAt(i);
+//        }
+//
+//
+//
+//        new Handler().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                startActivity(intent);
+//                overridePendingTransition(0, 0);
+//            }
+//        }, duration);
+//    }
 
 
     public void startActivityWithScaleAnimation(final Intent intent, long duration) {
@@ -543,13 +542,9 @@ public class MainActivity extends AppCompatActivity  {
                 accountHeader.setBackgroundRes(R.drawable.header);
             }
             accountHeader.updateProfile(activeProfile);
-            try {
-                HabitApplication.getInstance().updateUser(user);
-                MainActivity.this.getSharedPreferences("HabitAppPreferences", MODE_PRIVATE)
-                        .edit().putString("default_account", selectedAccountName).commit();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            HabitApplication.getInstance().updateUser(user);
+            MainActivity.this.getSharedPreferences("HabitAppPreferences", MODE_PRIVATE)
+                    .edit().putString("default_account", selectedAccountName).commit();
         }
     }
 }

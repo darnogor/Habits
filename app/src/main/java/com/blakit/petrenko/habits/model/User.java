@@ -1,46 +1,29 @@
 package com.blakit.petrenko.habits.model;
 
-import com.j256.ormlite.field.DataType;
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.ForeignCollectionField;
-import com.j256.ormlite.table.DatabaseTable;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import io.realm.RealmList;
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by user_And on 16.07.2015.
  */
-@DatabaseTable(tableName = "users")
-public class User {
+public class User extends RealmObject{
 
-    @DatabaseField(dataType = DataType.STRING, id = true)
+    @PrimaryKey
     private String name;
-
-    @DatabaseField(dataType = DataType.STRING)
     private String displayName;
-
-    @DatabaseField(dataType = DataType.STRING)
     private String nickName;
-
-    @DatabaseField(dataType = DataType.STRING)
     private String imgURL;
-
-    @DatabaseField(dataType = DataType.STRING)
     private String coverImgURL;
-
-    @ForeignCollectionField
-    private Collection<HabitDetails> myHabits;
+    private RealmList<HabitDetails> myHabits;
 
     //TODO: Add global settings for user
 
 
-    User() {}
+    public User() {}
 
     public User(String name) {
         this.name = name;
-        myHabits = new ArrayList<>();
     }
 
 
@@ -84,18 +67,12 @@ public class User {
         this.coverImgURL = coverImgURL;
     }
 
-    public Collection<HabitDetails> getMyHabits() {
+    public RealmList<HabitDetails> getMyHabits() {
         return myHabits;
     }
 
-    public void setMyHabits(List<HabitDetails> myHabits) {
+    public void setMyHabits(RealmList<HabitDetails> myHabits) {
         this.myHabits = myHabits;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || o.getClass() != getClass())
-            return false;
-        return name.equals(((User) o).getName());
-    }
 }

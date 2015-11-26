@@ -1,12 +1,10 @@
 package com.blakit.petrenko.habits;
 
 import android.app.Application;
-import android.content.SharedPreferences;
-import android.util.Log;
 
-import com.blakit.petrenko.habits.dao.HabitsDBOpenHelper;
+import com.blakit.petrenko.habits.dao.HabitDao;
+import com.blakit.petrenko.habits.dao.UserDao;
 import com.blakit.petrenko.habits.model.User;
-import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.nostra13.universalimageloader.cache.disc.impl.UnlimitedDiskCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -14,7 +12,10 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.utils.StorageUtils;
 
 import java.io.File;
-import java.sql.SQLException;
+
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+import io.realm.exceptions.RealmMigrationNeededException;
 
 /**
  * Created by user_And on 27.08.2015.
@@ -22,10 +23,10 @@ import java.sql.SQLException;
 public class HabitApplication extends Application {
 
     private static HabitApplication singleton;
-
     private User user;
-    private SharedPreferences appPreferences;
-    private HabitsDBOpenHelper dbOpenHelper;
+    private Realm realm;
+    private UserDao userDao;
+    private HabitDao habitDao;
 
     public static HabitApplication getInstance() {
         return singleton;
@@ -35,42 +36,56 @@ public class HabitApplication extends Application {
         return user;
     }
 
-    public void updateUser(User user) throws SQLException{
-        getDbOpenHelper().getUserDao().createOrUpdate(user);
-        this.user = user;
+    public void updateUser(User user) {
+        userDao.createOrUpdate(user);
+        this.user = userDao.getUserByName(user.getName());
     }
 
-    public void updateUser(String username) throws SQLException {
+    public void updateUser(String username) {
         User newUser = new User(username);
         updateUser(newUser);
     }
 
-    public void setCurrentUser(User user) throws SQLException {
-        this.user = getDbOpenHelper().getUserDao().getUserByName(user.getName());
-        if(this.user.getDisplayName() != null)
-            Log.d("SNHJKJF:",this.user.getDisplayName());
+    public void setCurrentUser(User user) {
+        this.user = userDao.getUserByName(user.getName());
         if (this.user == null) {
-            getDbOpenHelper().getUserDao().createIfNotExist(user);
-            this.user = getDbOpenHelper().getUserDao().getUserByName(user.getName());
+            updateUser(user);
         }
     }
 
-    public void setCurrentUser(String username) throws SQLException {
+    public void setCurrentUser(String username) {
         User user = new User(username);
         setCurrentUser(user);
     }
 
-    public HabitsDBOpenHelper getDbOpenHelper() {
-        if (dbOpenHelper == null) {
-            dbOpenHelper = OpenHelperManager.getHelper(this, HabitsDBOpenHelper.class);
+    public UserDao getUserDao() {
+        if (userDao == null) {
+            userDao = new UserDao(realm);
         }
-        return dbOpenHelper;
+        return userDao;
+    }
+
+    public HabitDao getHabitDao() {
+        if (habitDao == null) {
+            habitDao = new HabitDao(realm);
+        }
+        return habitDao;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
         singleton = this;
+//        try {
+//            realm = Realm.getInstance(this);
+//        } catch (RealmMigrationNeededException e) {
+//            new File(realm.getPath()).delete();
+//            realm = Realm.getInstance(this);
+//        }
+        realm = Realm.getInstance(this);
+
+        userDao = new UserDao(realm);
+        habitDao = new HabitDao(realm);
 
         File cacheDir = StorageUtils.getCacheDirectory(this, false);
 
@@ -85,22 +100,11 @@ public class HabitApplication extends Application {
                 .defaultDisplayImageOptions(options)
                 .build());
 
-//        appPreferences = getSharedPreferences("HabitAppPreferences", MODE_PRIVATE);
-//        String username = appPreferences.getString("default_account", "");
-//        if (!username.equals(""))
-//            try {
-//                setUser(username);
-//            } catch (SQLException e) {
-//                e.printStackTrace();
-//            }
-
     }
 
     @Override
     public void onTerminate() {
         super.onTerminate();
-        if (dbOpenHelper != null) {
-            OpenHelperManager.releaseHelper();
-        }
+        realm.close();
     }
 }

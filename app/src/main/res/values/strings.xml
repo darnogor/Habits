@@ -24,11 +24,15 @@
     <string name="create_habit_article_non">Article list is empty</string>
     <string name="create_habit_article_non_add"><u>Add article</u></string>
     <string name="create_habit_article_dialog_title">Add article</string>
-    <string name="create_habit_youtube_article_url_hint">Url of article</string>
-    <string name="create_habit_youtube_article_name_hint">Article title</string>
+    <string name="create_habit_article_dialog_url_hint">URL of article</string>
+    <string name="create_habit_article_dialog_title_hint">Article title</string>
+    <string name="create_habit_article_dialog_url_present">This article already present</string>
+    <string name="create_habit_article_dialog_url_invalid">Invalid URL</string>
+    <string name="create_habit_article_dialog_title_empty">Title is empty</string>
 
     <string name="create_habit_save_error_dialog_title">Unable to save the habit</string>
     <string name="create_habit_save_error_dialog_message">Not enough data. Fill in all the fields!</string>
+
 
     <!-- Navmenu items -->
     <string name="nav_menu_item_addhabit">Add habit</string>
@@ -59,4 +63,6 @@
     <string name="copy_link">Copy link</string>
     <string name="share">Share...</string>
     <string name="delete">Delete</string>
+    <string name="title_activity_add_habit">AddHabitActivity</string>
+    <string name="section_format">Hello World from section: %1$d</string>
 </resources>
