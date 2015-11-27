@@ -1228,6 +1228,7 @@ public class CreateHabitActivity extends AppCompatActivity {
 
                 @Override
                 public void afterTextChanged(Editable s) {
+                    urlWarning.setVisibility(View.GONE);
                     String uriStr = s.toString();
                     for (Article a: habit.getRelatedArticles()) {
                         if (a.getUri().equals(uriStr)) {
@@ -1236,7 +1237,7 @@ public class CreateHabitActivity extends AppCompatActivity {
                             return;
                         }
                     }
-                    if (!Utils.isUri(uriStr)) {
+                    if (!TextUtils.isEmpty(uriStr) && !Utils.isUri(uriStr)) {
                         urlWarning.setText(R.string.create_habit_article_dialog_url_invalid);
                         urlWarning.setVisibility(View.VISIBLE);
                         return;
@@ -1281,11 +1282,14 @@ public class CreateHabitActivity extends AppCompatActivity {
                         public void onClick(DialogInterface dialog, int which) {
                             if (article != null && !TextUtils.isEmpty(article.getTitle())) {
                                 isDataChanged = true;
+                                validateArticle();
                                 habit.getRelatedArticles().add(article);
                                 addAtricteToList(article);
                                 article = null;
                                 urlInput.setText("");
                                 titleInput.setText("");
+                                urlWarning.setVisibility(View.GONE);
+                                titleWarning.setVisibility(View.GONE);
                                 articleNon.setVisibility(View.GONE);
                             }
                         }
@@ -1293,6 +1297,14 @@ public class CreateHabitActivity extends AppCompatActivity {
                     .setNegativeButton(R.string.cancel, null)
                     .setCancelable(false)
                     .create();
+        }
+
+        private void validateArticle() {
+            String articleUri = article.getUri();
+            if (!articleUri.startsWith("http://") &&
+                    !articleUri.startsWith("https://")) {
+                article.setUri("http://"+articleUri);
+            }
         }
 
         public void show() {

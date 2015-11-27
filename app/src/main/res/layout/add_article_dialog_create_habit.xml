@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <View
         android:layout_width="match_parent"
         android:layout_height="10dp" />
 
+
     <EditText
         android:id="@+id/create_habit_article_dialog_url"
-        style="@style/EditTextTheme.Size"
+        style="@style/EditTextTheme.Size.Bottom"
         android:theme="@style/EditTextTheme"
         android:hint="@string/create_habit_article_dialog_url_hint"
         android:textColorHint="@color/md_white_1000"/>
@@ -18,14 +20,17 @@
         android:id="@+id/create_habit_article_dialog_url_warning"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="right"
         style="@style/CreateTheme.Small"
-        android:layout_marginBottom="18dp"
+        android:paddingTop="0dp"
         android:visibility="gone"
-        android:layout_marginLeft="18dp" />
+        android:layout_marginRight="18dp" />
+
+
 
     <EditText
         android:id="@+id/create_habit_article_dialog_title"
-        style="@style/EditTextTheme.Size"
+        style="@style/EditTextTheme.Size.Bottom"
         android:theme="@style/EditTextTheme"
         android:hint="@string/create_habit_article_dialog_title_hint"
         android:textColorHint="@color/md_white_1000"/>
@@ -35,10 +40,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         style="@style/CreateTheme.Small"
-        android:layout_marginBottom="18dp"
+        android:paddingTop="0dp"
+        android:layout_gravity="right"
         android:text="@string/create_habit_article_dialog_title_empty"
         android:visibility="gone"
-        android:layout_marginLeft="18dp" />
+        android:layout_marginRight="18dp" />
+
+
 
 
 </LinearLayout>

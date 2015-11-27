@@ -193,9 +193,14 @@ public class MainActivity extends AppCompatActivity  {
                         int id = iDrawerItem.getIdentifier();
                         switch (id) {
                             case NAV_MENU_ITEM_ADDHABITS:
-                                Intent addIntent = new Intent(MainActivity.this, AddHabitActivity.class);
-                                startActivity(addIntent);
-                                overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left_half);
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Intent addIntent = new Intent(MainActivity.this, AddHabitActivity.class);
+                                        startActivity(addIntent);
+                                        overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left_half);
+                                    }
+                                }, 350);
                                 break;
                             case NAV_MENU_ITEM_MYHABITS:
                                 return false;

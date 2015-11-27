@@ -14,7 +14,6 @@
         <item name="popupMenuStyle">@style/PopupMenuStyle</item>
         <item name="android:popupMenuStyle">@style/PopupMenuStyle</item>
 
-        <item name="android:windowIsTranslucent">true</item>
 
 
         <!-- MaterialDrawer specific values -->
@@ -66,6 +65,10 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_margin">14dp</item>
         <item name="android:padding">8dp</item>
+    </style>
+
+    <style name="EditTextTheme.Size.Bottom" parent="EditTextTheme.Size">
+        <item name="android:layout_marginBottom">3dp</item>
     </style>
 
     <style name="CheckBoxTheme">
