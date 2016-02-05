@@ -4,6 +4,7 @@ import android.app.Application;
 
 import com.blakit.petrenko.habits.dao.HabitDao;
 import com.blakit.petrenko.habits.dao.UserDao;
+import com.blakit.petrenko.habits.model.SearchHistory;
 import com.blakit.petrenko.habits.model.User;
 import com.nostra13.universalimageloader.cache.disc.impl.UnlimitedDiskCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -15,7 +16,6 @@ import java.io.File;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
-import io.realm.exceptions.RealmMigrationNeededException;
 
 /**
  * Created by user_And on 27.08.2015.
@@ -24,9 +24,6 @@ public class HabitApplication extends Application {
 
     private static HabitApplication singleton;
     private User user;
-    private Realm realm;
-    private UserDao userDao;
-    private HabitDao habitDao;
 
     public static HabitApplication getInstance() {
         return singleton;
@@ -36,41 +33,36 @@ public class HabitApplication extends Application {
         return user;
     }
 
-    public void updateUser(User user) {
+    public void updateCurrentUserSearchHistory(UserDao userDao, String searchStr) {
+        this.user = userDao.updateUserSearchHistory(user, searchStr);
+    }
+
+    public void updateCurrentUserPresentSearchHistory(UserDao userDao, String searchStr) {
+        this.user = userDao.updatePresentUserSearchHistory(user, searchStr);
+    }
+
+    public void updateUser(UserDao userDao, User user) {
         userDao.createOrUpdate(user);
         this.user = userDao.getUserByName(user.getName());
     }
 
-    public void updateUser(String username) {
+    public void updateUser(UserDao userDao, String username) {
         User newUser = new User(username);
-        updateUser(newUser);
+        updateUser(userDao, newUser);
     }
 
-    public void setCurrentUser(User user) {
+    public void setCurrentUser(UserDao userDao, User user) {
         this.user = userDao.getUserByName(user.getName());
         if (this.user == null) {
-            updateUser(user);
+            updateUser(userDao, user);
         }
     }
 
-    public void setCurrentUser(String username) {
+    public void setCurrentUser(UserDao userDao, String username) {
         User user = new User(username);
-        setCurrentUser(user);
+        setCurrentUser(userDao, user);
     }
 
-    public UserDao getUserDao() {
-        if (userDao == null) {
-            userDao = new UserDao(realm);
-        }
-        return userDao;
-    }
-
-    public HabitDao getHabitDao() {
-        if (habitDao == null) {
-            habitDao = new HabitDao(realm);
-        }
-        return habitDao;
-    }
 
     @Override
     public void onCreate() {
@@ -82,10 +74,13 @@ public class HabitApplication extends Application {
 //            new File(realm.getPath()).delete();
 //            realm = Realm.getInstance(this);
 //        }
-        realm = Realm.getInstance(this);
 
-        userDao = new UserDao(realm);
-        habitDao = new HabitDao(realm);
+        RealmConfiguration myConfig = new RealmConfiguration.Builder(this)
+                .name("habitsrealm.realm")
+                .schemaVersion(1)
+                .build();
+
+        Realm.setDefaultConfiguration(myConfig);
 
         File cacheDir = StorageUtils.getCacheDirectory(this, false);
 
@@ -102,9 +97,5 @@ public class HabitApplication extends Application {
 
     }
 
-    @Override
-    public void onTerminate() {
-        super.onTerminate();
-        realm.close();
-    }
+
 }

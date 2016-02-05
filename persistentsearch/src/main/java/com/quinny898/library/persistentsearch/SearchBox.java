@@ -290,7 +290,7 @@ public class SearchBox extends RelativeLayout {
 				int[] location = new int[2];
 				menuButton.getLocationInWindow(location);
 				hideCircularly(location[0] + menuButton.getWidth() * 2 / 3, location[1],
-                        activity);
+						activity);
 			}
 		}
 	}
@@ -311,7 +311,7 @@ public class SearchBox extends RelativeLayout {
 		SupportAnimator animator = ViewAnimationUtils.createCircularReveal(
 				root, x, y, 0, finalRadius);
 		animator.setInterpolator(new ReverseInterpolator());
-		animator.setDuration(500);
+		animator.setDuration(400);
 		animator.start();
 		animator.addListener(new SupportAnimator.AnimatorListener() {
 
@@ -666,6 +666,17 @@ public class SearchBox extends RelativeLayout {
 		if (resultList != null)return resultList.size();
 		return 0;
 	}
+
+
+	public boolean isSearchablesHasString(String searchStr) {
+		for (SearchResult searchResult: searchables) {
+			if (searchResult.title.equals(searchStr)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	
 	/***
 	 * Set the searchable items from a list (replaces any current items)
@@ -681,6 +692,15 @@ public class SearchBox extends RelativeLayout {
 	public void addSearchable(SearchResult searchable) {
 		if (!searchables.contains(searchable))
 			searchables.add(searchable);
+	}
+
+	/***
+	 * Add a searchable item at front
+	 * @param searchable SearchResult
+	 */
+	public void addSearchableFront(SearchResult searchable) {
+		if (!searchables.contains(searchable))
+			searchables.add(0, searchable);
 	}
 
     /***
@@ -728,7 +748,7 @@ public class SearchBox extends RelativeLayout {
 		SupportAnimator animator = ViewAnimationUtils.createCircularReveal(
 				root, (int)x, (int)y, 0, finalRadius);
 		animator.setInterpolator(new AccelerateDecelerateInterpolator());
-		animator.setDuration(500);
+		animator.setDuration(400);
 		animator.addListener(new SupportAnimator.AnimatorListener() {
 
             @Override
@@ -778,6 +798,9 @@ public class SearchBox extends RelativeLayout {
      */
     public void setAnimateDrawerLogo(boolean show){
         animateDrawerLogo = show;
+		if (!show) {
+			materialMenu.setState(IconState.ARROW);
+		}
     }
 
 	private void openSearch(Boolean openKeyboard) {
@@ -907,7 +930,7 @@ public class SearchBox extends RelativeLayout {
 				if (mAnimate) {
 					Animation anim = AnimationUtils.loadAnimation(getContext(),
 							R.anim.anim_down);
-					anim.setDuration(400);
+					anim.setDuration(300);
 					convertView.startAnimation(anim);
 					if (count == this.getCount()) {
 						mAnimate = false;
@@ -945,7 +968,8 @@ public class SearchBox extends RelativeLayout {
     @Override
     public boolean dispatchKeyEvent(KeyEvent e) {
         if(e.getKeyCode() == KeyEvent.KEYCODE_BACK && getVisibility() == View.VISIBLE){
-            hideCircularly((Activity) getContext());
+//            hideCircularly((Activity) getContext());
+			toggleSearch();
             return true;
         }
 

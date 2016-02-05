@@ -2,6 +2,7 @@ package com.blakit.petrenko.habits;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -15,13 +16,12 @@ import android.widget.TextView;
 import com.blakit.petrenko.habits.model.HabitDetails;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
  * Created by user_And on 17.07.2015.
  */
-public class HabitDetailsAdapter extends RecyclerView.Adapter<HabitDetailsAdapter.HabitViewHolder> {
+public class HabitDetailsAdapter extends RecyclerView.Adapter<HabitDetailsAdapter.HabitDetailsViewHolder> {
 
     private static final String PACKAGE_NAME = "com.blakit.petrenko.habits";
 
@@ -29,10 +29,10 @@ public class HabitDetailsAdapter extends RecyclerView.Adapter<HabitDetailsAdapte
     private List<HabitDetails> habits;
 
 
-    public HabitDetailsAdapter(Context context, Collection<HabitDetails> habits) {
+    public HabitDetailsAdapter(Context context, List<HabitDetails> habits) {
         this.context = context;
         if (habits != null) {
-            this.habits = new ArrayList<>(habits);
+            this.habits = habits;
         } else {
             this.habits = new ArrayList<>();
         }
@@ -40,15 +40,15 @@ public class HabitDetailsAdapter extends RecyclerView.Adapter<HabitDetailsAdapte
 
 
     @Override
-    public HabitViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public HabitDetailsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.my_habit_item, parent, false);
-        return new HabitViewHolder(v);
+        return new HabitDetailsViewHolder(v);
     }
 
 
     @Override
-    public void onBindViewHolder(final HabitViewHolder holder, final int position) {
+    public void onBindViewHolder(final HabitDetailsViewHolder holder, final int position) {
         final HabitDetails curHabitDetails = habits.get(position);
 
 //        holder.dayImage.setImageResource(R.drawable.circle_mask);
@@ -57,8 +57,8 @@ public class HabitDetailsAdapter extends RecyclerView.Adapter<HabitDetailsAdapte
                 .get(curHabitDetails.getCurrentDay()).getAction());
         holder.checkBox.setChecked(curHabitDetails.isChecked());
         if(curHabitDetails.isChecked()) {
-            holder.bottomBlock.setCardBackgroundColor(context.getResources()
-                    .getColor(R.color.colorPrimaryDark));
+            holder.bottomBlock.setCardBackgroundColor(ContextCompat
+                    .getColor(context, R.color.colorPrimary));
 
         }
 
@@ -96,15 +96,15 @@ public class HabitDetailsAdapter extends RecyclerView.Adapter<HabitDetailsAdapte
                 curHabitDetails.setIsChecked(isChecked);
                 holder.checkBox.setChecked(isChecked);
                 if(isChecked) {
-                    holder.bottomBlock.setCardBackgroundColor(context.getResources()
-                            .getColor(R.color.colorPrimaryDark));
-                    holder.done.setTextColor(context.getResources()
-                            .getColor(R.color.md_white_1000));
+                    holder.bottomBlock.setCardBackgroundColor(ContextCompat
+                            .getColor(context, R.color.colorPrimary));
+                    holder.done.setTextColor(ContextCompat
+                            .getColor(context, R.color.md_white_1000));
                 } else {
-                    holder.bottomBlock.setCardBackgroundColor(context.getResources()
-                            .getColor(R.color.md_white_1000));
-                    holder.done.setTextColor(context.getResources()
-                            .getColor(R.color.textColor));
+                    holder.bottomBlock.setCardBackgroundColor(ContextCompat
+                            .getColor(context, R.color.md_white_1000));
+                    holder.done.setTextColor(ContextCompat
+                            .getColor(context, R.color.textColor));
                 }
             }
         };
@@ -140,7 +140,7 @@ public class HabitDetailsAdapter extends RecyclerView.Adapter<HabitDetailsAdapte
     }
 
 
-    public static class HabitViewHolder extends RecyclerView.ViewHolder {
+    public static class HabitDetailsViewHolder extends RecyclerView.ViewHolder {
         private CardView topBlock;
         private CardView bottomBlock;
         private ImageView dayImage;
@@ -149,7 +149,7 @@ public class HabitDetailsAdapter extends RecyclerView.Adapter<HabitDetailsAdapte
         private CheckBox checkBox;
         private TextView done;
 
-        public HabitViewHolder(View itemView) {
+        public HabitDetailsViewHolder(View itemView) {
             super(itemView);
 
             topBlock = (CardView) itemView.findViewById(R.id.my_habits_top_block);

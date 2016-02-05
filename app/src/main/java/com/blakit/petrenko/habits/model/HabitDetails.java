@@ -1,5 +1,7 @@
 package com.blakit.petrenko.habits.model;
 
+import android.support.annotation.NonNull;
+
 import java.util.UUID;
 
 import io.realm.RealmObject;
@@ -13,6 +15,9 @@ public class HabitDetails extends RealmObject {
     @PrimaryKey
     private String id;
 
+    private String userId;
+    private String habitId;
+
     private User user;
     private Habit habit;
 
@@ -23,8 +28,14 @@ public class HabitDetails extends RealmObject {
     //TODO: Add settings of the habit
 
 
-    public HabitDetails() {
-        this.id = UUID.randomUUID().toString();
+    public HabitDetails() {}
+
+    public HabitDetails(@NonNull User user, @NonNull Habit habit) {
+        this.id = userId + " " + habitId;
+        this.userId = user.getName();
+        this.habitId = habit.getId();
+        this.user = user;
+        this.habit = habit;
     }
 
     public String getId() {
@@ -33,6 +44,22 @@ public class HabitDetails extends RealmObject {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getHabitId() {
+        return habitId;
+    }
+
+    public void setHabitId(String habitId) {
+        this.habitId = habitId;
     }
 
     public User getUser() {

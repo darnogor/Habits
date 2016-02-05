@@ -1,5 +1,7 @@
 package com.blakit.petrenko.habits.model;
 
+import android.support.annotation.NonNull;
+
 import com.blakit.petrenko.habits.model.converters.ActionListParcelConverter;
 import com.blakit.petrenko.habits.model.converters.ArticleListParcelConverter;
 import com.blakit.petrenko.habits.model.converters.VideoItemParcelConverter;
@@ -7,6 +9,7 @@ import com.blakit.petrenko.habits.model.converters.VideoItemParcelConverter;
 import org.parceler.Parcel;
 import org.parceler.ParcelPropertyConverter;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,33 +32,41 @@ public class Habit extends RealmObject{
     private String author;
     private boolean isPublic;
     private String description;
+    private Category category;
     private RealmList<Action> actions;
     private RealmList<VideoItem> relatedVideoItems;
     private RealmList<Article> relatedArticles;
 
+    private int addCount;
+    private int completeCount;
+
+    private Date creationDate;
+
     public Habit() {
         this.id = UUID.randomUUID().toString();
+        this.relatedVideoItems = new RealmList<>();
+        this.relatedArticles = new RealmList<>();
+        this.addCount = 0;
+        this.completeCount = 0;
+        this.creationDate = new Date();
     }
 
-    public Habit(String name, String action) {
-        this.id = UUID.randomUUID().toString();
+    public Habit(@NonNull String name, String action) {
+        this();
         this.name = name;
         this.actions = new RealmList<>();
         for (int i = 0; i < 21; ++i) {
             this.actions.add(new Action(action, i+1));
         }
-        this.relatedVideoItems = new RealmList<>();
-        this.relatedArticles = new RealmList<>();
     }
 
-    public Habit(String name, List<Action> actions) {
+    public Habit(@NonNull String name, List<Action> actions) {
+        this();
         this.name = name;
         this.actions = new RealmList<>();
         for (Action a: actions) {
             this.actions.add(a);
         }
-        this.relatedVideoItems = new RealmList<>();
-        this.relatedArticles = new RealmList<>();
     }
 
     public String getId() {
@@ -98,6 +109,14 @@ public class Habit extends RealmObject{
         this.description = description;
     }
 
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+
     public RealmList<Action> getActions() {
         return actions;
     }
@@ -125,4 +144,27 @@ public class Habit extends RealmObject{
         this.relatedArticles = relatedArticles;
     }
 
+    public int getAddCount() {
+        return addCount;
+    }
+
+    public void setAddCount(int addCount) {
+        this.addCount = addCount;
+    }
+
+    public int getCompleteCount() {
+        return completeCount;
+    }
+
+    public void setCompleteCount(int completeCount) {
+        this.completeCount = completeCount;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
 }

@@ -46,7 +46,6 @@ import com.blakit.petrenko.habits.utils.Utils;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.youtube.player.YouTubeStandalonePlayer;
-import com.google.android.youtube.player.internal.ac;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -69,12 +68,15 @@ import org.parceler.Parcels;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import io.realm.Realm;
+
 public class CreateHabitActivity extends AppCompatActivity {
+
+    private Realm realm;
 
     private Habit habit;
 
@@ -98,6 +100,8 @@ public class CreateHabitActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_habit);
+
+        realm = Realm.getDefaultInstance();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
@@ -417,7 +421,7 @@ public class CreateHabitActivity extends AppCompatActivity {
                     setErrorBackground(defaultActions);
                 }
                 if (isInputOK) {
-                    HabitDao habitDao = HabitApplication.getInstance().getHabitDao();
+                    HabitDao habitDao = new HabitDao(realm);
                     habitDao.createOrUpdate(habit);
                     isDataChanged = false;
                     onBackPressed();
@@ -527,7 +531,7 @@ public class CreateHabitActivity extends AppCompatActivity {
 
         if (!action.isSkipped()) {
             checked.setIcon(GoogleMaterial.Icon.gmd_check_circle);
-            checked.setColorRes(R.color.colorPrimaryDark);
+            checked.setColorRes(R.color.colorPrimary);
             skippedTextView.setText(R.string.create_habit_action_not_skipped);
         } else {
             checked.setIcon(GoogleMaterial.Icon.gmd_block);
@@ -549,7 +553,7 @@ public class CreateHabitActivity extends AppCompatActivity {
                 } else {
                     action.setIsSkipped(false);
                     checked.setIcon(GoogleMaterial.Icon.gmd_check_circle);
-                    checked.setColorRes(R.color.colorPrimaryDark);
+                    checked.setColorRes(R.color.colorPrimary);
                     skippedTextView.setText(R.string.create_habit_action_not_skipped);
                     dayEditText.setEnabled(true);
                 }
@@ -626,6 +630,12 @@ public class CreateHabitActivity extends AppCompatActivity {
         outState.putString("add_article_dialog_uri", addArticleDialog.getUri());
         outState.putString("add_article_dialog_title", addArticleDialog.getTitle());
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        realm.close();
     }
 
     @Override
@@ -822,36 +832,10 @@ public class CreateHabitActivity extends AppCompatActivity {
             thumbnailView.getLayoutParams().width = width;
             thumbnailView.setImageBitmap(videoItem.getThumbnail());
 
-
-            PeriodFormatter formatter = ISOPeriodFormat.standard();
-            Period p = formatter.parsePeriod(videoItem.getDuration());
-            StringBuilder builder = new StringBuilder();
-            if (p.toStandardHours().getHours() > 0) {
-                builder.append(p.toStandardHours().getHours());
-                builder.append(":");
-            }
-            if (p.getMinutes() < 10) {
-                builder.append("0");
-            }
-            builder.append(p.getMinutes());
-            builder.append(":");
-            if (p.getSeconds() < 10) {
-                builder.append("0");
-            }
-            builder.append(p.getSeconds());
-            durationView.setText(builder);
-
-            String num = videoItem.getViewsCount();
-            builder.setLength(0);
-            builder.append(num);
-            for (int i = num.length()-3; i > 0; i -= 3) {
-                builder.insert(i, ',');
-            }
-            builder.insert(0, context.getString(R.string.create_habit_youtube_views) + " ");
-
+            durationView.setText(Utils.videoDurationByFormattedString(videoItem.getDuration()));
             titleView.setText(videoItem.getTitle());
             channelView.setText(videoItem.getChanel());
-            viewsView.setText(builder);
+            viewsView.setText(Utils.viewsCountByNumberString(context, videoItem.getViewsCount()));
 
 
             final PopupMenu menu = new PopupMenu(context, moreView);

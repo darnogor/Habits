@@ -9,4 +9,6 @@
     <dimen name="column_width">170dp</dimen>
     <dimen name="top_block_height">160dp</dimen>
     <dimen name="bottom_block_height">60dp</dimen>
+
+    <dimen name="add_habit_details_header_height">170dp</dimen>
 </resources>

@@ -5,22 +5,60 @@
 
     <style name="AppTheme.Base" parent="Theme.AppCompat">
         <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorPrimaryDark">@color/colorPrimary</item>
+        <item name="android:windowBackground">@color/windowBackground</item>
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
         <item name="android:textColor">@color/textColor</item>
-        <item name="colorControlNormal">@color/md_white_1000</item>
+        <item name="colorControlNormal">@color/colorControlNormal</item>
 
         <item name="popupMenuStyle">@style/PopupMenuStyle</item>
         <item name="android:popupMenuStyle">@style/PopupMenuStyle</item>
-
-
 
         <!-- MaterialDrawer specific values -->
         <item name="material_drawer_primary_text">@color/textColor</item>
         <item name="material_drawer_secondary_text">@color/textColor</item>
         <item name="material_drawer_selected_text">@color/selectedTextColor</item>
 
+    </style>
+
+    <style name="AppTheme.Translucent" parent="AppTheme"/>
+
+
+
+    <style name="AddDetailsTheme.Small.Font" parent="TextAppearance.AppCompat.Small">
+        <item name="android:textColor">@color/md_black_1000</item>
+        <item name="android:layout_marginLeft">15dp</item>
+        <item name="android:layout_marginRight">15dp</item>
+        <item name="android:layout_marginTop">5dp</item>
+        <item name="font">OpenSans-Light</item>
+    </style>
+    <style name="AddDetailsTheme.Normal.Font" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:textColor">@color/md_black_1000</item>
+        <item name="android:layout_marginLeft">15dp</item>
+        <item name="android:layout_marginRight">15dp</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="font">OpenSans-Light</item>
+    </style>
+    <style name="AddDetailsTheme.Normal.Font.Header" parent="AddDetailsTheme.Normal.Font">
+        <item name="font">OpenSans-Regular</item>
+    </style>
+    <style name="AddDetailsTheme.Large.Font" parent="TextAppearance.AppCompat.Large">
+        <item name="android:textColor">@color/md_white_1000</item>
+        <item name="android:layout_marginLeft">15dp</item>
+        <item name="android:layout_marginRight">15dp</item>
+        <item name="font">OpenSans-Regular</item>
+    </style>
+
+
+    <style name="AddTheme.Normal" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:textColor">@color/md_black_1000</item>
+        <item name="android:paddingLeft">17dp</item>
+    </style>
+
+    <style name="AddTheme.Small.Font" parent="TextAppearance.AppCompat.Small">
+        <item name="android:textColor">@color/createActionsSmallTextColor</item>
+        <item name="font">OpenSans-Light</item>
     </style>
 
     <style name="CreateTheme.Header" parent="TextAppearance.AppCompat.Large">
@@ -50,6 +88,13 @@
 
     <style name="CreateTheme.Small.Youtube" parent="CreateTheme.Small">
         <item name="android:paddingTop">3dp</item>
+    </style>
+
+    <style name="VideoItem.Small" parent="CreateTheme.Small.Youtube">
+        <item name="android:paddingTop">0dp</item>
+    </style>
+    <style name="VideoItem.Small.Title" parent="CreateTheme.Small.Youtube">
+        <item name="android:textColor">@color/textColor</item>
     </style>
 
     <style name="EditTextTheme">

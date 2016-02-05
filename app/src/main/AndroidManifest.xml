@@ -31,7 +31,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".HabitActivity"></activity>
+        <activity android:name=".HabitActivity" />
 
         <provider
             android:name=".sync.StubProvider"
@@ -54,10 +54,14 @@
 
         <activity
             android:name=".CreateHabitActivity"
-            android:label="@string/title_activity_create_habit"></activity>
+            android:label="@string/title_activity_create_habit" />
         <activity
             android:name=".AddHabitActivity"
-            android:label="@string/title_activity_add_habit"></activity>
+            android:label="@string/title_activity_add_habit" />
+        <activity android:name=".SearchActivity" />
+        <activity
+            android:name=".AddHabitDetailsActivity"
+            android:theme="@style/AppTheme.Translucent"/>
     </application>
 
 </manifest>

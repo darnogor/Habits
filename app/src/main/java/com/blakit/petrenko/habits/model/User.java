@@ -16,6 +16,7 @@ public class User extends RealmObject{
     private String imgURL;
     private String coverImgURL;
     private RealmList<HabitDetails> myHabits;
+    private RealmList<SearchHistory> searchHistories;
 
     //TODO: Add global settings for user
 
@@ -75,4 +76,11 @@ public class User extends RealmObject{
         this.myHabits = myHabits;
     }
 
+    public RealmList<SearchHistory> getSearchHistories() {
+        return searchHistories;
+    }
+
+    public void setSearchHistories(RealmList<SearchHistory> searchHistories) {
+        this.searchHistories = searchHistories;
+    }
 }

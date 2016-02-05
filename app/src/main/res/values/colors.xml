@@ -2,9 +2,10 @@
 <resources>
     <color name="material_drawer_header_selection_text">@color/md_white_1000</color>
 
-    <color name="colorPrimary">#E6E6E6</color>
+    <color name="windowBackground">#E6E6E6</color>
     <!-- #37CF37 -->
-    <color name="colorPrimaryDark">@color/md_green_A700</color>
+    <color name="colorPrimary">@color/md_green_A700</color>
+    <color name="colorControlNormal">@color/md_white_1000</color>
     <color name="textColor">#393939</color>
     <color name="selectedTextColor">@color/md_green_A700</color>
 

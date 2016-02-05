@@ -1,5 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="85dp"
+    android:background="@color/md_white_1000">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.wnafee.vector.MorphButton
+            android:id="@+id/habit_item_symbol_back"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            app:vc_startDrawable="@drawable/circle"/>
+
+        <TextView
+            android:id="@+id/habit_item_symbol"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:textSize="18sp"
+            android:textColor="@color/md_white_1000"
+            android:paddingTop="10dp"
+            android:paddingLeft="15dp"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="15dp"
+            android:layout_marginRight="32dp"
+            android:layout_toRightOf="@+id/habit_item_symbol">
+
+            <com.blakit.petrenko.habits.view.FontTextView
+                android:id="@+id/habit_item_number"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/AddTheme.Normal"
+                android:maxLines="1"/>
+
+            <com.blakit.petrenko.habits.view.FontTextView
+                android:id="@+id/habit_item_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/AddTheme.Normal"
+                android:paddingLeft="7dp"
+                android:maxLines="1"
+                android:ellipsize="end"/>
+
+        </LinearLayout>
+
+
+
+        <com.mikepenz.iconics.view.IconicsImageView
+            android:id="@+id/habit_item_menu"
+            android:layout_width="25dp"
+            android:layout_height="30dp"
+            app:iiv_color="@color/icon_color_states"
+            android:layout_alignParentRight="true"
+            android:paddingRight="12dp"
+            android:paddingTop="12dp" />
+
+
+        <com.blakit.petrenko.habits.view.FontTextView
+            android:id="@+id/habit_item_author"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/AddTheme.Small.Font"
+            android:singleLine="true"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="13dp"
+            android:layout_alignParentBottom="true"/>
+
+
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true">
+
+
+            <com.blakit.petrenko.habits.view.FontTextView
+                android:id="@+id/habit_item_add_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/CreateTheme.Small"
+                android:paddingTop="0dp"
+                android:layout_marginBottom="10dp"/>
+
+            <com.mikepenz.iconics.view.IconicsTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/CreateTheme.Small"
+                android:text="{gmd-add}"
+                android:layout_marginBottom="5dp"
+                android:layout_marginRight="7dp"
+                android:layout_marginLeft="1dp"
+                android:paddingTop="0dp"
+                android:layout_marginTop="2dp" />
+
+            <com.blakit.petrenko.habits.view.FontTextView
+                android:id="@+id/habit_item_complete_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/CreateTheme.Small"
+                android:layout_marginBottom="10dp"
+                android:paddingTop="0dp" />
+
+            <com.mikepenz.iconics.view.IconicsTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/CreateTheme.Small"
+                android:text="{gmd-check-circle}"
+                android:layout_marginRight="10dp"
+                android:layout_marginLeft="1dp"
+                android:layout_marginBottom="5dp"
+                android:paddingTop="0dp"
+                android:layout_marginTop="2dp" />
+
+
+        </LinearLayout>
+
+
+
+    </RelativeLayout>
 
 </android.support.v7.widget.CardView>

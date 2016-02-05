@@ -9,8 +9,8 @@
 
     <ImageView
         android:id="@+id/icon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:layout_centerVertical="true"
         android:layout_margin="10dp"
         android:paddingLeft="3dp"
@@ -24,19 +24,19 @@
         android:layout_height="wrap_content"
         android:textColor="#212121"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="62dp"
+        android:layout_marginLeft="50dp"
         android:layout_alignParentLeft="true"
         android:layout_toLeftOf="@+id/up"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <ImageView
         android:id="@+id/up"
         android:layout_alignParentRight="true"
-        android:layout_width="32dp"
+        android:layout_width="24dp"
         android:layout_margin="10dp"
         android:layout_marginRight="24dp"
         android:layout_gravity="center|right"
-        android:layout_height="32dp"
+        android:layout_height="24dp"
         android:src="@drawable/ic_up" />
 
     <View

@@ -34,6 +34,20 @@
     <string name="create_habit_save_error_dialog_message">Not enough data. Fill in all the fields!</string>
 
 
+    <!-- Add habit -->
+    <string name="add_habit_tab_categories">Categories</string>
+    <string name="add_habit_tab_popular">Popular</string>
+    <string name="add_habit_tab_new">New</string>
+    <string name="add_habit_tab_all">All habits</string>
+
+    <!-- Add habit details -->
+    <string name="add_habit_details_description">Description</string>
+    <string name="add_habit_details_actions">Actions</string>
+    <string name="add_habit_details_videos">Videos</string>
+
+    <!-- Categories names -->
+    <string name="category_habit_first">First</string>
+
     <!-- Navmenu items -->
     <string name="nav_menu_item_addhabit">Add habit</string>
     <string name="nav_menu_item_myhabits">My habits</string>
@@ -56,6 +70,7 @@
     <string name="day">Day</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
+    <string name="show_all">Show all</string>
     <string name="exit_dialog_save_message">Data will be lost. Are you sure you want to exit?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
@@ -65,4 +80,8 @@
     <string name="delete">Delete</string>
     <string name="title_activity_add_habit">AddHabitActivity</string>
     <string name="section_format">Hello World from section: %1$d</string>
+    <string name="category">Category</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

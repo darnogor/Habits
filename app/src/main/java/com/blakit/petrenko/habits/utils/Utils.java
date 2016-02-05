@@ -1,6 +1,10 @@
 package com.blakit.petrenko.habits.utils;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -10,12 +14,21 @@ import android.util.Patterns;
 import android.view.View;
 
 import com.blakit.petrenko.habits.HabitApplication;
+import com.blakit.petrenko.habits.R;
 import com.blakit.petrenko.habits.model.Action;
 import com.blakit.petrenko.habits.model.Habit;
 
+import org.joda.time.Period;
+import org.joda.time.format.ISOPeriodFormat;
+import org.joda.time.format.PeriodFormatter;
+
+import java.lang.reflect.Field;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import io.realm.RealmList;
 
 /**
  * Created by user_And on 26.09.2015.
@@ -88,6 +101,7 @@ public class Utils {
         return null;
     }
 
+
     public static Action getAction(@NonNull Habit habit, int day) {
         for (Action a: habit.getActions()) {
             if (a.getDay() == day) {
@@ -95,5 +109,97 @@ public class Utils {
             }
         }
         return null;
+    }
+
+
+    public static Action getAction(@NonNull RealmList<Action> actions, int day) {
+        for (Action a: actions) {
+            if (a.getDay() == day) {
+                return a;
+            }
+        }
+        return null;
+    }
+
+
+    public static String videoDurationByFormattedString(String formattedDuration) {
+        PeriodFormatter formatter = ISOPeriodFormat.standard();
+        Period p = formatter.parsePeriod(formattedDuration);
+
+        StringBuilder builder = new StringBuilder();
+
+        if (p.toStandardHours().getHours() > 0) {
+            builder.append(p.toStandardHours().getHours());
+            builder.append(":");
+        }
+        if (p.getMinutes() < 10) {
+            builder.append("0");
+        }
+        builder.append(p.getMinutes());
+        builder.append(":");
+        if (p.getSeconds() < 10) {
+            builder.append("0");
+        }
+        builder.append(p.getSeconds());
+
+        return builder.toString();
+    }
+
+
+    public static String viewsCountByNumberString(Context context, String num) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(num);
+        for (int i = num.length()-3; i > 0; i -= 3) {
+            builder.insert(i, ',');
+        }
+        builder.insert(0, context.getString(R.string.create_habit_youtube_views) + " ");
+
+        return builder.toString();
+    }
+
+
+    public static String randomString(int length) {
+        char[] chars = "abcdefghijklmnopqrstuvwxyz   ".toCharArray();
+        StringBuilder builder = new StringBuilder();
+        Random random = new Random();
+        String first = String.valueOf(chars[random.nextInt(chars.length-3)]).toUpperCase();
+        builder.append(first);
+        for (int i = 1; i < length; i++) {
+            char c = chars[random.nextInt(chars.length)];
+            builder.append(c);
+        }
+        return builder.toString();
+    }
+
+
+    public static boolean isAccountManagerHasAccount(Context context, String accountName) {
+        for (Account account: AccountManager.get(context).getAccounts()) {
+            if (account.name.equals(accountName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    public static boolean isActivityLand(Activity activity) {
+        return activity.getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_LANDSCAPE;
+    }
+
+
+    public static String getStringByResName(Context context, String resName) {
+        try {
+            Field field = R.string.class.getField(resName);
+            if (field != null) {
+                int resId = field.getInt(null);
+                return context.getString(resId);
+            }
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 }

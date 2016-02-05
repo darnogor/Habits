@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Habits.iml" filepath="$PROJECT_DIR$/Habits.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/persistentsearch/persistentsearch.iml" filepath="$PROJECT_DIR$/persistentsearch/persistentsearch.iml" />
     </modules>
   </component>
 </project>
