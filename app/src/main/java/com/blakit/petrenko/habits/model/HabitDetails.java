@@ -31,11 +31,14 @@ public class HabitDetails extends RealmObject {
     public HabitDetails() {}
 
     public HabitDetails(@NonNull User user, @NonNull Habit habit) {
-        this.id = userId + " " + habitId;
         this.userId = user.getName();
         this.habitId = habit.getId();
+        this.id = userId + "_" + habitId;
         this.user = user;
         this.habit = habit;
+
+        this.currentDay = 1;
+        this.isChecked = false;
     }
 
     public String getId() {
@@ -90,7 +93,7 @@ public class HabitDetails extends RealmObject {
         return isChecked;
     }
 
-    public void setIsChecked(boolean isChecked) {
+    public void setChecked(boolean isChecked) {
         this.isChecked = isChecked;
     }
 

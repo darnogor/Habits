@@ -14,6 +14,7 @@
 
         <item name="popupMenuStyle">@style/PopupMenuStyle</item>
         <item name="android:popupMenuStyle">@style/PopupMenuStyle</item>
+        <item name="android:itemBackground">@color/md_grey_200</item>
 
         <!-- MaterialDrawer specific values -->
         <item name="material_drawer_primary_text">@color/textColor</item>
@@ -25,6 +26,12 @@
     <style name="AppTheme.Translucent" parent="AppTheme"/>
 
 
+
+    <style name="CheckBoxAppTheme" parent="Theme.AppCompat.Light">
+        <item name="colorAccent">@color/md_white_1000</item>
+        <item name="colorControlHighlight">@color/md_grey_200</item>
+        <item name="android:textColorSecondary">@color/md_grey_500</item>
+    </style>
 
     <style name="AddDetailsTheme.Small.Font" parent="TextAppearance.AppCompat.Small">
         <item name="android:textColor">@color/md_black_1000</item>
@@ -75,6 +82,10 @@
         <item name="android:paddingLeft">18dp</item>
         <item name="android:paddingTop">10dp</item>
     </style>
+    <style name="CreateTheme.Normal.Min" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:textColor">@color/textColor</item>
+        <item name="android:paddingLeft">18dp</item>
+    </style>
     <style name="CreateTheme.Normal.Font" parent="CreateTheme.Normal">
         <item name="android:paddingTop">0dp</item>
         <item name="font">OpenSans-Light</item>
@@ -118,7 +129,7 @@
 
     <style name="CheckBoxTheme">
         <item name="android:textColor">@color/textColor</item>
-        <item name="colorControlActivated">@color/colorPrimaryDark</item>
+        <item name="colorControlActivated">@color/colorPrimary</item>
         <item name="colorControlNormal">@color/createActionsSmallTextColor</item>
     </style>
 
@@ -126,6 +137,12 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_margin">14dp</item>
+    </style>
+
+    <style name="CheckBoxTheme.Size.Min">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginLeft">14dp</item>
     </style>
 
     <style name="PopupMenuStyle" parent="Widget.AppCompat.PopupMenu">

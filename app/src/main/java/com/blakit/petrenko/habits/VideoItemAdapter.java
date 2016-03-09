@@ -31,11 +31,19 @@ import io.realm.RealmList;
 public class VideoItemAdapter extends RecyclerView.Adapter<VideoItemAdapter.VHVideoItem> {
 
     private Context context;
+    private RecyclerView parent;
     private RealmList<VideoItem> videos;
 
-    public VideoItemAdapter(Context context, RealmList<VideoItem> videos) {
+    private float sp;
+
+    public VideoItemAdapter(Context context, RecyclerView parent, RealmList<VideoItem> videos) {
         this.context = context;
+        this.parent = parent;
         this.videos = videos;
+
+        sp = context.getResources().getDisplayMetrics().scaledDensity;
+
+        updateHeight();
     }
 
     @Override
@@ -95,7 +103,15 @@ public class VideoItemAdapter extends RecyclerView.Adapter<VideoItemAdapter.VHVi
 
     @Override
     public int getItemCount() {
+        updateHeight();
         return videos.size();
+    }
+
+
+    public void updateHeight() {
+        if (videos.size() > 0) {
+            parent.getLayoutParams().height = Utils.dpToPx(context, 180) + (int) (56 * sp);
+        }
     }
 
 

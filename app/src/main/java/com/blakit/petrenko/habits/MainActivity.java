@@ -41,7 +41,6 @@ import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.common.AccountPicker;
-import com.google.api.client.googleapis.extensions.android.accounts.GoogleAccountManager;
 import com.google.api.client.util.Charsets;
 import com.google.api.services.youtube.YouTubeScopes;
 import com.google.common.io.CharStreams;
@@ -64,10 +63,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import io.realm.Realm;
+import io.realm.RealmResults;
+import io.realm.Sort;
 
 
 public class MainActivity extends AppCompatActivity  {
@@ -125,6 +127,7 @@ public class MainActivity extends AppCompatActivity  {
         recyclerView = (AutofitGridRecyclerView) findViewById(R.id.recycler_view);
         recyclerView.addItemDecoration(new MarginDecoration(this));
         recyclerView.setHasFixedSize(true);
+        recyclerView.setAdapter(new HabitDetailsAdapter(this, new ArrayList<HabitDetails>()));
         
         UserDao userDao = new UserDao(realm);
 
@@ -150,6 +153,7 @@ public class MainActivity extends AppCompatActivity  {
         final int count = 100;
 
         final Button loadTest = (Button) findViewById(R.id.test_button);
+        final Button deleteTest = (Button) findViewById(R.id.test_button_delete);
         final ProgressBar testBar = (ProgressBar) findViewById(R.id.test_progress);
         testBar.setVisibility(View.GONE);
         testBar.setProgress(0);
@@ -162,12 +166,13 @@ public class MainActivity extends AppCompatActivity  {
             @Override
             public void onClick(View v) {
                 loadTest.setEnabled(false);
+                deleteTest.setEnabled(false);
                 testBar.setVisibility(View.VISIBLE);
                 realm.executeTransaction(new Realm.Transaction() {
                     @Override
                     public void execute(Realm realm) {
                         for (int i = 0; i < count; ++i) {
-                            final Habit h = new Habit(Utils.randomString(28) + "-name", "Action");
+                            final Habit h = new Habit(Utils.randomString(15), "Action");
                             h.setAuthor("Author " + random.nextInt());
                             h.setAddCount(random.nextInt(100000));
                             h.setCompleteCount(random.nextInt(100000));
@@ -179,6 +184,34 @@ public class MainActivity extends AppCompatActivity  {
                     @Override
                     public void onSuccess() {
                         loadTest.setEnabled(true);
+                        deleteTest.setEnabled(true);
+                        testBar.setVisibility(View.GONE);
+                    }
+                });
+            }
+        });
+
+        deleteTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loadTest.setEnabled(false);
+                deleteTest.setEnabled(false);
+                testBar.setVisibility(View.VISIBLE);
+                realm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        RealmResults<Habit> results = realm.where(Habit.class).findAllSorted("creationDate", Sort.DESCENDING);
+                        testBar.setMax(Math.min(count, results.size()));
+                        for (int i = 0; i < Math.min(count, results.size()); ++i) {
+                            results.remove(0);
+                            testBar.setProgress(i+1);
+                        }
+                    }
+                }, new Realm.Transaction.Callback() {
+                    @Override
+                    public void onSuccess() {
+                        loadTest.setEnabled(true);
+                        deleteTest.setEnabled(true);
                         testBar.setVisibility(View.GONE);
                     }
                 });
@@ -193,7 +226,7 @@ public class MainActivity extends AppCompatActivity  {
 
     private void startChooseAccountActivity() {
         Intent intent = AccountPicker.newChooseAccountIntent(null, null,
-                new String[]{GoogleAccountManager.ACCOUNT_TYPE},
+                new String[]{"com.google"},
                 true, null, null, null, null);
         startActivityForResult(intent, CHOOSE_ACCOUNT);
     }
@@ -300,10 +333,17 @@ public class MainActivity extends AppCompatActivity  {
                                 }, 350);
                                 return false;
                             case NAV_MENU_ITEM_PROFILE:
+                                for(HabitDetails hd: HabitApplication.getInstance().getUser().getMyHabits()) {
+                                    Log.d("!!!!HabitDetails: ", hd.getHabit().getName());
+                                }
                                 break;
                             case NAV_MENU_ITEM_SETTINGS:
                                 break;
                             case NAV_MENU_ITEM_HELP:
+                                realm.beginTransaction();
+                                HabitApplication.getInstance().getUser().getMyHabits().clear();
+                                realm.clear(HabitDetails.class);
+                                realm.commitTransaction();
                                 break;
                             case NAV_MENU_ITEM_INFO:
                                 UserDao userDao = new UserDao(realm);
@@ -569,6 +609,10 @@ public class MainActivity extends AppCompatActivity  {
             this.selectedAccountName = selectedAccountName;
             accountHeader.setActiveProfile(100+length);
         }
+    }
+
+    public Realm getRealm() {
+        return realm;
     }
 
     private class RetrieveTokenTask extends AsyncTask<String, Void, JSONObject> {

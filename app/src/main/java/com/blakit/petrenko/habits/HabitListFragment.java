@@ -50,6 +50,10 @@ public class HabitListFragment extends Fragment {
 
         realm = Realm.getDefaultInstance();
 
+        if (savedInstanceState != null) {
+            order = savedInstanceState.getInt("order");
+        }
+
         HabitDao habitDao = new HabitDao(realm);
         switch (order) {
             case ORDER_POPULAR:
@@ -91,6 +95,12 @@ public class HabitListFragment extends Fragment {
         super.onDestroyView();
         habits.removeChangeListeners();
         realm.close();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putInt("order", order);
+        super.onSaveInstanceState(outState);
     }
 
     public void setRealm(Realm realm) {

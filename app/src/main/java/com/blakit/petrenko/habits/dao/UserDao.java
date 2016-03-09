@@ -1,7 +1,9 @@
 package com.blakit.petrenko.habits.dao;
 
 import android.content.Context;
+import android.util.Log;
 
+import com.blakit.petrenko.habits.model.HabitDetails;
 import com.blakit.petrenko.habits.model.SearchHistory;
 import com.blakit.petrenko.habits.model.User;
 
@@ -57,6 +59,26 @@ public class UserDao {
             }
         });
         return getUserByName(user.getName());
+    }
+
+
+    public void createOrUpdateHabitDetails(final HabitDetails habitDetails) {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                User user = habitDetails.getUser();
+                boolean hasHD = false;
+                for (HabitDetails hd: user.getMyHabits()) {
+                    Log.d("!!!!HD ID: ",hd.getId());
+                    if (hd.getHabitId().equals(habitDetails.getHabitId())) {
+                        hasHD = true;
+                    }
+                }
+                if (!hasHD) {
+                    user.getMyHabits().add(habitDetails);
+                }
+            }
+        });
     }
 
     public Realm getRealm() {

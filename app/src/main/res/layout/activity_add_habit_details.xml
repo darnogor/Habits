@@ -20,7 +20,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="?attr/actionBarSize"
-            app:contentScrim="?attr/colorPrimary"
             app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed">
 
             <RelativeLayout
@@ -38,7 +37,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_marginBottom="25dp"
+                    android:layout_marginBottom="24dp"
                     android:layout_alignLeft="@+id/add_habit_details_header"
                     android:layout_alignBottom="@+id/add_habit_details_header">
 
@@ -109,7 +108,7 @@
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/add_habit_details_days_recyclerView"
                 android:layout_width="match_parent"
-                android:layout_height="62dp" />
+                android:layout_height="wrap_content" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -117,7 +116,9 @@
                 android:orientation="vertical"
                 android:background="#fff3e0"
                 android:paddingBottom="9dp"
-                android:layout_marginBottom="40dp">
+                android:layout_marginLeft="9dp"
+                android:layout_marginRight="9dp"
+                android:layout_marginBottom="30dp">
 
                 <com.blakit.petrenko.habits.view.FontTextView
                     android:id="@+id/add_habit_details_day"
@@ -156,20 +157,50 @@
                     android:layout_alignParentRight="true"
                     android:layout_above="@+id/add_habit_details_videos_recyclerView"
                     android:text="@string/show_all"
+                    android:textAllCaps="true"
                     android:clickable="true"/>
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/add_habit_details_videos_recyclerView"
                     android:layout_width="match_parent"
-                    android:layout_height="200dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:layout_below="@+id/add_habit_details_videos_title"/>
 
             </RelativeLayout>
 
-            <View
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="400dp"/>
+                android:layout_height="wrap_content">
+
+                <com.blakit.petrenko.habits.view.FontTextView
+                    android:id="@+id/add_habit_details_articles_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/AddDetailsTheme.Normal.Font.Header"
+                    android:text="@string/add_habit_details_articles"/>
+
+                <com.blakit.petrenko.habits.view.FontTextView
+                    android:id="@+id/add_habit_details_articles_all"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/AddDetailsTheme.Small.Font"
+                    android:layout_marginBottom="1dp"
+                    android:textColor="@color/md_grey_600"
+                    android:layout_alignParentRight="true"
+                    android:layout_above="@+id/add_habit_details_articles_recyclerView"
+                    android:text="@string/show_all"
+                    android:textAllCaps="true"
+                    android:clickable="true"/>
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/add_habit_details_articles_recyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:layout_below="@+id/add_habit_details_articles_title"/>
+
+            </RelativeLayout>
 
         </LinearLayout>
 
@@ -182,9 +213,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
+        android:scaleType="center"
         app:fabSize="normal"
         app:elevation="7dp"
-        app:backgroundTint="@color/md_red_400"
+        app:backgroundTint="@color/md_red_500"
         app:layout_anchor="@id/add_habit_details_appBarLayout"
         app:layout_anchorGravity="bottom|right|end"/>
 

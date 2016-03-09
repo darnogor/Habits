@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.blakit.petrenko.habits.dao.HabitDao;
 import com.blakit.petrenko.habits.dao.UserDao;
 import com.blakit.petrenko.habits.model.SearchHistory;
+import com.blakit.petrenko.habits.utils.Utils;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.quinny898.library.persistentsearch.SearchBox;
@@ -62,21 +63,25 @@ public class AddHabitActivity extends AppCompatActivity {
         tabLayout = (TabLayout) findViewById(R.id.add_habit_tabLayout);
         tabLayout.setupWithViewPager(viewPager);
 
-        int maxWidth = 0;
+        tabLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                int maxWidth = 0;
 
-        for (int i = 0; i < tabLayout.getTabCount(); ++i) {
-            View view = ((ViewGroup) tabLayout.getChildAt(0)).getChildAt(i);
-            view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+                for (int i = 0; i < tabLayout.getTabCount(); ++i) {
+                    View view = ((ViewGroup) tabLayout.getChildAt(0)).getChildAt(i);
 
-            int width = view.getMeasuredWidth();
-            if (maxWidth < width) {
-                maxWidth = width;
+                    int width = view.getWidth();
+                    if (maxWidth < width) {
+                        maxWidth = width;
+                    }
+                }
+                for (int i = 0; i < tabLayout.getTabCount(); ++i) {
+                    View view = ((ViewGroup) tabLayout.getChildAt(0)).getChildAt(i);
+                    view.getLayoutParams().width = maxWidth;
+                }
             }
-        }
-        for (int i = 0; i < tabLayout.getTabCount(); ++i) {
-            View view = ((ViewGroup) tabLayout.getChildAt(0)).getChildAt(i);
-            view.getLayoutParams().width = maxWidth;
-        }
+        });
     }
 
 
@@ -141,11 +146,8 @@ public class AddHabitActivity extends AppCompatActivity {
 
     private void startBarAnimation(float from, float to, long duration, final int visibilityAfter) {
         Animation barAnimation = new AlphaAnimation(from, to);
-        Animation tabAnimation = new ScaleAnimation(1.0f, 1.0f, from, to);
 
         barAnimation.setDuration(duration+20);
-        tabAnimation.setDuration(duration);
-
         barAnimation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
@@ -162,25 +164,13 @@ public class AddHabitActivity extends AppCompatActivity {
 
             }
         });
-        tabAnimation.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
 
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                tabLayout.setVisibility(visibilityAfter);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
-
+        if (visibilityAfter == View.VISIBLE) {
+            Utils.expand(tabLayout);
+        } else {
+            Utils.collapse(tabLayout);
+        }
         appBarLayout.startAnimation(barAnimation);
-        tabLayout.startAnimation(tabAnimation);
     }
 
 
@@ -291,9 +281,9 @@ public class AddHabitActivity extends AppCompatActivity {
         intent.putExtra("search_str", searchStr);
 
 
-        dimView.setVisibility(View.GONE);
-        appBarLayout.setVisibility(View.VISIBLE);
-        search.toggleSearch();
+//        dimView.setVisibility(View.GONE);
+//        appBarLayout.setVisibility(View.VISIBLE);
+//        search.toggleSearch();
 
         startActivity(intent);
         overridePendingTransition(0, 0);

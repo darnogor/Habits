@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
@@ -11,13 +12,13 @@ import com.blakit.petrenko.habits.R;
 import com.blakit.petrenko.habits.utils.Utils;
 
 /**
- * Created by user_And on 30.01.2016.
+ * Created by user_And on 11.02.2016.
  */
-public class DaysItemDecoration extends RecyclerView.ItemDecoration {
+public class GridLineItemDecoration extends RecyclerView.ItemDecoration {
 
     private Paint paint;
 
-    public DaysItemDecoration(Context context) {
+    public GridLineItemDecoration(Context context) {
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setColor(ContextCompat.getColor(context, R.color.md_grey_200));
         paint.setStyle(Paint.Style.FILL);
@@ -30,6 +31,11 @@ public class DaysItemDecoration extends RecyclerView.ItemDecoration {
 
         final RecyclerView.LayoutManager layoutManager = parent.getLayoutManager();
 
+        int spanCount = parent.getChildCount();
+        if (layoutManager instanceof GridLayoutManager) {
+            spanCount = ((GridLayoutManager) layoutManager).getSpanCount();
+        }
+
         for (int i = 0; i < parent.getChildCount(); ++i) {
             final View child = parent.getChildAt(i);
 
@@ -40,13 +46,10 @@ public class DaysItemDecoration extends RecyclerView.ItemDecoration {
 
             int cx = left + (right - left) / 2;
             int cy = top + (bottom - top) / 2;
-            int radius = (right - left) / 3;
 
-            c.drawCircle(cx, cy, radius, paint);
-
-            if (i == 0) {
+            if (i % spanCount == 0) {
                 c.drawLine(cx, cy, right, cy, paint);
-            } else if (i == parent.getChildCount()-1) {
+            } else if (i % spanCount == spanCount-1) {
                 c.drawLine(left, cy, cx, cy, paint);
             } else {
                 c.drawLine(left, cy, right, cy, paint);

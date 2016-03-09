@@ -1,62 +1,57 @@
 package com.blakit.petrenko.habits;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
 
-import com.amulyakhare.textdrawable.TextDrawable;
-import com.blakit.petrenko.habits.model.Action;
+import com.blakit.petrenko.habits.dao.UserDao;
 import com.blakit.petrenko.habits.model.Habit;
+import com.blakit.petrenko.habits.model.HabitDetails;
 import com.blakit.petrenko.habits.utils.ColorGenerator;
-import com.blakit.petrenko.habits.utils.Utils;
 import com.blakit.petrenko.habits.view.AppBarStateChangeListener;
 import com.blakit.petrenko.habits.view.DaysItemDecoration;
 import com.blakit.petrenko.habits.view.FontTextView;
-import com.blakit.petrenko.habits.view.HeaderDecoration;
 import com.blakit.petrenko.habits.view.MarginDecoration;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
-import com.mikepenz.iconics.view.IconicsImageView;
-import com.mikepenz.material_design_iconic_typeface_library.MaterialDesignIconic;
 
 import org.parceler.Parcels;
 
-import io.realm.RealmList;
+import io.realm.Realm;
 
 public class AddHabitDetailsActivity extends AppCompatActivity {
 
+    private Realm realm;
     private Habit habit;
+    private HabitDetails habitDetails;
 
-    private FontTextView dayView;
-    private FontTextView actionView;
+    private int color = ColorGenerator.MATERIAL.getRandomColor();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_habit_details);
 
+        realm = Realm.getDefaultInstance();
+
         habit = Parcels.unwrap(getIntent().getParcelableExtra("habit"));
+        habitDetails = new HabitDetails(HabitApplication.getInstance().getUser(), habit);
 
         initToolbar();
         initHeaderAndDescription();
         initActions();
-        initVideos();
+        initVideosAndArticles();
         initFab();
     }
 
@@ -73,6 +68,9 @@ public class AddHabitDetailsActivity extends AppCompatActivity {
         final CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.add_habit_details_collapsingToolbarLayout);
         final AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.add_habit_details_appBarLayout);
 
+        collapsingToolbarLayout.setContentScrimColor(color);
+        collapsingToolbarLayout.setStatusBarScrimColor(color);
+
         appBarLayout.addOnOffsetChangedListener(new AppBarStateChangeListener((int) (toolbar.getMeasuredHeight()*1.2)) {
             @Override
             public void onStateChanged(AppBarLayout appBarLayout, State state) {
@@ -88,7 +86,7 @@ public class AddHabitDetailsActivity extends AppCompatActivity {
 
     private void initHeaderAndDescription() {
         ImageView headerImage = (ImageView) findViewById(R.id.add_habit_details_header);
-        headerImage.setImageDrawable(new ColorDrawable(ColorGenerator.MATERIAL.getRandomColor()));
+        headerImage.setImageDrawable(new ColorDrawable(color));
 
         FontTextView title       = (FontTextView) findViewById(R.id.add_habit_details_title);
         FontTextView category    = (FontTextView) findViewById(R.id.add_habit_details_category);
@@ -101,36 +99,42 @@ public class AddHabitDetailsActivity extends AppCompatActivity {
 
 
     private void initActions() {
-        dayView     = (FontTextView) findViewById(R.id.add_habit_details_day);
-        actionView  = (FontTextView) findViewById(R.id.add_habit_details_action);
+        FontTextView dayView     = (FontTextView) findViewById(R.id.add_habit_details_day);
+        FontTextView actionView  = (FontTextView) findViewById(R.id.add_habit_details_action);
 
         RecyclerView daysRecyclerView = (RecyclerView) findViewById(R.id.add_habit_details_days_recyclerView);
 
-        daysRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        daysRecyclerView.setLayoutManager(new org.solovyev.android.views.llm.LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         daysRecyclerView.addItemDecoration(new DaysItemDecoration(this));
-        daysRecyclerView.setAdapter(new DaysAdapter(this, habit.getActions()));
+        daysRecyclerView.setAdapter(new DaysAdapter(this, dayView, actionView, habit.getActions()));
+        daysRecyclerView.setNestedScrollingEnabled(false);
     }
 
 
-    private void initVideos() {
-        RecyclerView videosRecyclerView = (RecyclerView) findViewById(R.id.add_habit_details_videos_recyclerView);
+    private void initVideosAndArticles() {
+        final RecyclerView videosRecyclerView   = (RecyclerView) findViewById(R.id.add_habit_details_videos_recyclerView);
+        RecyclerView articlesRecyclerView = (RecyclerView) findViewById(R.id.add_habit_details_articles_recyclerView);
+        FontTextView videosShowAll        = (FontTextView) findViewById(R.id.add_habit_details_videos_all);
+        FontTextView articlesShowAll      = (FontTextView) findViewById(R.id.add_habit_details_articles_all);
 
         videosRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         videosRecyclerView.addItemDecoration(new MarginDecoration(this));
-        videosRecyclerView.addItemDecoration(HeaderDecoration.with(videosRecyclerView)
-                    .inflate(R.layout.video_item_header)
-                    .parallax(0.5f)
-                    .build());
-        videosRecyclerView.setAdapter(new VideoItemAdapter(this, habit.getRelatedVideoItems()));
-    }
+        videosRecyclerView.setAdapter(new VideoItemAdapter(this, videosRecyclerView, habit.getRelatedVideoItems()));
+        videosRecyclerView.setNestedScrollingEnabled(false);
 
 
-    private void initFab() {
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.add_habit_details_add);
-        fab.setImageDrawable(new IconicsDrawable(this)
-                .icon(GoogleMaterial.Icon.gmd_add)
-                .color(Color.WHITE));
-        fab.setOnClickListener(new View.OnClickListener() {
+        articlesRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        articlesRecyclerView.addItemDecoration(new MarginDecoration(this));
+        articlesRecyclerView.setAdapter(new ArticlesAdapter(this, articlesRecyclerView, habit.getRelatedArticles()));
+        articlesRecyclerView.setNestedScrollingEnabled(false);
+
+        videosShowAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+        articlesShowAll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -138,11 +142,66 @@ public class AddHabitDetailsActivity extends AppCompatActivity {
         });
     }
 
+
+    private void initFab() {
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.add_habit_details_add);
+        fab.setImageDrawable(new IconicsDrawable(this)
+                .icon(GoogleMaterial.Icon.gmd_add)
+                .color(Color.WHITE)
+                .sizeDp(16));
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addHabitClicked();
+            }
+        });
+    }
+
+
+    private void addHabitClicked() {
+        UserDao userDao = new UserDao(realm);
+        userDao.createOrUpdateHabitDetails(habitDetails);
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        realm.close();
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_add_habit_details_toolbar, menu);
+
+        MenuItem edit   = menu.findItem(R.id.menu_add_habit_details_edit);
+        MenuItem delete = menu.findItem(R.id.menu_add_habit_details_delete);
+
+        if (!HabitApplication.getInstance().getUser().getName()
+                .equals(habitDetails.getHabit().getAuthor())) {
+            edit.setVisible(false);
+            delete.setVisible(false);
+        }
+
+        return true;
+    }
+
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
                 onBackPressed();
+                break;
+            case R.id.menu_add_habit_details_add:
+                addHabitClicked();
+                break;
+            case R.id.menu_add_habit_details_create_copy:
+                break;
+            case R.id.menu_add_habit_details_edit:
+                break;
+            case R.id.menu_add_habit_details_delete:
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -154,104 +213,4 @@ public class AddHabitDetailsActivity extends AppCompatActivity {
         overridePendingTransition(0, R.anim.exit_to_bottom);
     }
 
-
-    private class DaysAdapter extends RecyclerView.Adapter<DaysViewHolder> {
-
-        private Context context;
-        private RealmList<Action> actions;
-
-        private int lastClickPosition = 0;
-        private int colorClicked;
-        private int colorNormal;
-
-        private float sp;
-
-        public DaysAdapter(Context context, RealmList<Action> actions) {
-            this.context = context;
-            this.actions = actions;
-
-            colorClicked = ContextCompat.getColor(context, R.color.md_white_1000);
-            colorNormal = ContextCompat.getColor(context, R.color.md_grey_700);
-
-            sp = context.getResources().getDisplayMetrics().scaledDensity;
-        }
-
-
-        @Override
-        public DaysViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View v = LayoutInflater.from(context)
-                    .inflate(R.layout.day_item, parent, false);
-            return new DaysViewHolder(v);
-        }
-
-        @Override
-        public void onBindViewHolder(final DaysViewHolder holder, final int position) {
-            final Action action = Utils.getAction(actions, position + 1);
-
-            String text = ""+action.getDay();
-
-            TextDrawable numberDr = TextDrawable.builder()
-                    .beginConfig()
-                        .useFont(holder.number.getTypeface())
-                        .fontSize((int) (holder.number.getTextSize() + 2 * sp))
-                    .endConfig()
-                    .buildRound(text, 0x0000);
-
-            holder.fab.setImageDrawable(numberDr);
-            holder.number.setText(text);
-            holder.view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (lastClickPosition != position) {
-                        lastClickPosition = position;
-                        notifyDataSetChanged();
-                    }
-                }
-            });
-
-            if (lastClickPosition == position) {
-                holder.number.setTextColor(colorClicked);
-                holder.fab.setVisibility(View.VISIBLE);
-                startFabAnimation(holder.fab);
-
-                dayView.setText(context.getString(R.string.day)+" "+action.getDay());
-                actionView.setText(action.getAction());
-            } else {
-                holder.number.setTextColor(colorNormal);
-                holder.fab.setVisibility(View.GONE);
-            }
-        }
-
-        @Override
-        public int getItemCount() {
-            return actions.size();
-        }
-
-
-        void startFabAnimation(View fab) {
-            ScaleAnimation animation = new ScaleAnimation(0.7f, 1.0f, 0.7f, 1.0f,
-                    Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-            animation.setDuration(200);
-
-            fab.startAnimation(animation);
-        }
-    }
-
-
-
-    private class DaysViewHolder extends RecyclerView.ViewHolder {
-        private View view;
-        private FloatingActionButton fab;
-        private FontTextView number;
-
-        public DaysViewHolder(View itemView) {
-            super(itemView);
-
-            view = itemView;
-            fab = (FloatingActionButton) itemView.findViewById(R.id.day_item_fab);
-            number = (FontTextView) itemView.findViewById(R.id.day_item_number);
-
-
-        }
-    }
 }

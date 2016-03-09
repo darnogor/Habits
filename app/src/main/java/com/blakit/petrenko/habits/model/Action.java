@@ -2,7 +2,6 @@ package com.blakit.petrenko.habits.model;
 
 import org.parceler.Parcel;
 
-import java.io.Serializable;
 import java.util.UUID;
 
 import io.realm.ActionRealmProxy;
@@ -21,6 +20,7 @@ public class Action extends RealmObject {
     private String id;
     private String action;
     private int day;
+    private boolean isUseDefault;
     private boolean isSkipped;
 
     public Action() {
@@ -32,6 +32,7 @@ public class Action extends RealmObject {
         this.action = action;
         this.day = day;
         this.isSkipped = false;
+        this.isUseDefault = false;
     }
 
     public String getId() {
@@ -62,8 +63,15 @@ public class Action extends RealmObject {
         return isSkipped;
     }
 
-    public void setIsSkipped(boolean isSkipped) {
+    public void setSkipped(boolean isSkipped) {
         this.isSkipped = isSkipped;
     }
 
+    public boolean isUseDefault() {
+        return isUseDefault;
+    }
+
+    public void setUseDefault(boolean isUseDefault) {
+        this.isUseDefault = isUseDefault;
+    }
 }

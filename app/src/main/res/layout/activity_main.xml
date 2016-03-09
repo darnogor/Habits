@@ -9,11 +9,25 @@
         android:id="@+id/toolbar"
         layout="@layout/toolbar"/>
 
-    <Button
-        android:id="@+id/test_button"
-        android:layout_width="60dp"
-        android:layout_height="40dp"
-        android:text="LOAD"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/test_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="LOAD"/>
+
+        <Button
+            android:id="@+id/test_button_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="DELETE"/>
+
+    </RelativeLayout>
 
     <ProgressBar
         android:id="@+id/test_progress"
@@ -25,7 +39,7 @@
     <com.blakit.petrenko.habits.view.AutofitGridRecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:padding="@dimen/item_margin"
         android:columnWidth="@dimen/column_width"
         android:layoutAnimation="@anim/grid_layout_animation" />

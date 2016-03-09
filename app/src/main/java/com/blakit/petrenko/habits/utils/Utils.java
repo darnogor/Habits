@@ -5,24 +5,37 @@ import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.os.Build;
+import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
-import android.support.v4.net.ConnectivityManagerCompat;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
+import android.widget.TextView;
 
 import com.blakit.petrenko.habits.HabitApplication;
 import com.blakit.petrenko.habits.R;
 import com.blakit.petrenko.habits.model.Action;
 import com.blakit.petrenko.habits.model.Habit;
+import com.blakit.petrenko.habits.model.HabitDetails;
 
 import org.joda.time.Period;
 import org.joda.time.format.ISOPeriodFormat;
 import org.joda.time.format.PeriodFormatter;
 
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -37,8 +50,20 @@ public class Utils {
 
     private static final AtomicInteger sNextGeneratedId = new AtomicInteger(1);
 
+    @ColorInt
+    private static final int[] PROGRESS_COLORS = {
+            0xffef5350,
+            0xffffa726,
+            0xffffca28,
+            0xffffee58,
+            0xffd4e157,
+            0xff9ccc65,
+            0xff66bb6a,
+            0xff4caf50
+    };
+
     /**
-     * Generate a value suitable for use in {@link View.setId(int)}.
+     * Generate a value suitable for use in {View.setId(int)}.
      * This value will not collide with ID values generated at build time by aapt for R.id.
      *
      * @return a generated ID value
@@ -201,5 +226,228 @@ public class Utils {
             e.printStackTrace();
         }
         return "";
+    }
+
+
+    public static int getColorByProgress(int daysCount, int currentDay, boolean isChecked) {
+        int percent = (int) (getPercent(daysCount, currentDay, isChecked) * 100);
+
+        int red   = (percent < 50) ? 255 : (int) Math.round(256 - (percent-50)*5.12);
+        int green = (percent > 50) ? 255 : (int) Math.round((percent)*5.12);
+
+        return Color.argb(255, red, green, 0);
+    }
+
+
+    public static int getColorByProgress(HabitDetails habitDetails) {
+        return getColorByProgress(habitDetails.getHabit().getActions().size(),
+                habitDetails.getCurrentDay(),
+                habitDetails.isChecked());
+    }
+
+    public static int getColorMaterialByProgress(HabitDetails habitDetails) {
+        float percent = getPercent(habitDetails);
+
+        return PROGRESS_COLORS[((int) (7 * percent))];
+    }
+
+
+    public static int getColorByProgressWithRange(int daysCount, int currentDay, boolean isChecked,
+                                                  int startColor, int endColor) {
+        float percent = getPercent(daysCount, currentDay, isChecked);
+
+        return Color.argb((int) (percent * Color.alpha(endColor) + (1 - percent) * Color.alpha(startColor)),
+                (int) (percent * Color.red(endColor) + (1 - percent) * Color.red(startColor)),
+                (int) (percent * Color.green(endColor) + (1 - percent) * Color.green(startColor)),
+                (int) (percent * Color.blue(endColor) + (1 - percent) * Color.blue(startColor)));
+    }
+
+
+    public static int getColorByProgressWithRange(HabitDetails habitDetails,
+                                                  int startColor, int endColor) {
+        return getColorByProgressWithRange(habitDetails.getHabit().getActions().size(),
+                habitDetails.getCurrentDay(),
+                habitDetails.isChecked(),
+                startColor, endColor);
+    }
+
+
+    public static float getPercent(int daysCount, int currentDay, boolean isChecked) {
+        return (float) (currentDay - ((isChecked) ? 0 : 1)) / daysCount;
+    }
+
+
+    public static float getPercent(HabitDetails habitDetails) {
+        return getPercent(habitDetails.getHabit().getActions().size(),
+                habitDetails.getCurrentDay(),
+                habitDetails.isChecked());
+    }
+
+
+    public static int dpToPx(Context context, float dp) {
+        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+        int px = Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+        return px;
+    }
+
+
+    public static int pxToDp(Context context, int px) {
+        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+        int dp = Math.round(px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+        return dp;
+    }
+
+
+    public static void expand(final View v) {
+        v.measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        final int targetHeight = v.getMeasuredHeight();
+
+        // Older versions of android (pre API 21) cancel animations for views with a height of 0.
+        v.getLayoutParams().height = 1;
+        v.setVisibility(View.VISIBLE);
+        Animation a = new Animation()
+        {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                v.getLayoutParams().height = interpolatedTime == 1
+                        ? ViewGroup.LayoutParams.WRAP_CONTENT
+                        : (int)(targetHeight * interpolatedTime);
+                v.requestLayout();
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        // 1dp/ms
+        a.setDuration((int)(targetHeight / v.getContext().getResources().getDisplayMetrics().density));
+        v.startAnimation(a);
+    }
+
+
+    public static void expand(final View v, long duration) {
+        v.measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        final int targetHeight = v.getMeasuredHeight();
+
+        // Older versions of android (pre API 21) cancel animations for views with a height of 0.
+        v.getLayoutParams().height = 1;
+        v.setVisibility(View.VISIBLE);
+        Animation a = new Animation()
+        {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                v.getLayoutParams().height = interpolatedTime == 1
+                        ? ViewGroup.LayoutParams.WRAP_CONTENT
+                        : (int)(targetHeight * interpolatedTime);
+                v.requestLayout();
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        // 1dp/ms
+        a.setDuration(duration);
+        v.startAnimation(a);
+    }
+
+
+    public static void collapse(final View v) {
+        final int initialHeight = v.getMeasuredHeight();
+
+        Animation a = new Animation()
+        {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                if(interpolatedTime == 1){
+                    v.setVisibility(View.GONE);
+                }else{
+                    v.getLayoutParams().height = initialHeight - (int)(initialHeight * interpolatedTime);
+                    v.requestLayout();
+                }
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        a.setDuration((int)(initialHeight / v.getContext().getResources().getDisplayMetrics().density));
+        v.startAnimation(a);
+    }
+
+
+    public static void collapse(final View v, long duration) {
+        final int initialHeight = v.getMeasuredHeight();
+
+        Animation a = new Animation()
+        {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                if(interpolatedTime == 1){
+                    v.setVisibility(View.GONE);
+                }else{
+                    v.getLayoutParams().height = initialHeight - (int)(initialHeight * interpolatedTime);
+                    v.requestLayout();
+                }
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        a.setDuration(duration);
+        v.startAnimation(a);
+    }
+
+
+    public static void setMaxLinesByMaxHeight(final TextView textView, final int maxHeightPx) {
+        textView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                int maxLines = maxHeightPx / textView.getLineHeight();
+
+                textView.setMaxLines(maxLines);
+                textView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+            }
+        });
+    }
+
+
+    public static String parseTitleByURL(String urlStr) {
+        final Pattern TITLE_TAG =
+                Pattern.compile("\\<title>(.*)\\</title>", Pattern.CASE_INSENSITIVE|Pattern.DOTALL);
+
+        try {
+            URL url = new URL(urlStr);
+            URLConnection urlConnection = url.openConnection();
+            DataInputStream dis = new DataInputStream(urlConnection.getInputStream());
+
+            String html = "", tmp = "";
+            while ((tmp = dis.readUTF()) != null) {
+                html += " " + tmp;
+            }
+            dis.close();
+
+            html = html.replaceAll("\\s+", " ");
+            Matcher m = TITLE_TAG.matcher(html);
+
+            while (m.find() == true) {
+                return m.group(1);
+            }
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

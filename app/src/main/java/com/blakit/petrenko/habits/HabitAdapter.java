@@ -51,7 +51,7 @@ public class HabitAdapter extends RecyclerView.Adapter<HabitAdapter.HabitViewHol
     }
 
     @Override
-    public void onBindViewHolder(HabitViewHolder holder, int position) {
+    public void onBindViewHolder(final HabitViewHolder holder, int position) {
         final Habit habit = habits.get(position);
 
 //        try {
@@ -74,6 +74,12 @@ public class HabitAdapter extends RecyclerView.Adapter<HabitAdapter.HabitViewHol
                 activity.overridePendingTransition(R.anim.enter_from_bottom, 0);
             }
         });
+        holder.itemView.post(new Runnable() {
+            @Override
+            public void run() {
+                holder.author.setMaxWidth((int) (holder.itemView.getWidth() / 2.205));
+            }
+        });
 
         holder.symbol.setText(new String("" + habit.getName().charAt(0)).toUpperCase());
         holder.symbolBack.setForegroundTintList(ColorStateList.valueOf(ColorGenerator.MATERIAL.getRandomColor()));
@@ -81,7 +87,7 @@ public class HabitAdapter extends RecyclerView.Adapter<HabitAdapter.HabitViewHol
         holder.title.setText(habit.getName());
         holder.author.setText(habit.getAuthor());
         holder.addCount.setText(habit.getAddCount()+"");
-        holder.completeCount.setText(habit.getCompleteCount()+"");
+        holder.completeCount.setText(habit.getCompleteCount() + "");
 
         final PopupMenu menu = new PopupMenu(context, holder.menu);
         menu.inflate(R.menu.menu_create_habit);
@@ -107,8 +113,6 @@ public class HabitAdapter extends RecyclerView.Adapter<HabitAdapter.HabitViewHol
                 menu.show();
             }
         });
-
-
     }
 
     @Override
@@ -137,7 +141,7 @@ public class HabitAdapter extends RecyclerView.Adapter<HabitAdapter.HabitViewHol
             itemView.setClickable(true);
 
             symbolBack = (MorphButton) itemView.findViewById(R.id.habit_item_symbol_back);
-            symbol = (TextView) itemView.findViewById(R.id.habit_item_symbol);
+            symbol = (TextView) itemView.findViewById(R.id.habit_item_symbol_text);
             number = (FontTextView) itemView.findViewById(R.id.habit_item_number);
             title = (FontTextView) itemView.findViewById(R.id.habit_item_title);
             menu = (IconicsImageView) itemView.findViewById(R.id.habit_item_menu);

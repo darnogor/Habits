@@ -9,8 +9,14 @@
     <string name="create_habit_actions">Actions</string>
     <string name="create_habit_actions_default">Default action:</string>
     <string name="create_habit_actions_details">Each day separately</string>
+    <string name="create_habit_day_dialog_action_hint">Action in this day</string>
+    <string name="create_habit_day_dialog_action_warning">Invalid action</string>
+    <string name="create_habit_day_dialog_use_default_check">Set default action</string>
+    <string name="create_habit_day_dialog_skipped_check">Skip this day</string>
     <string name="create_habit_action_not_skipped"><u>The day is not skipped</u></string>
     <string name="create_habit_action_skipped"><u>The day is skipped</u></string>
+    <string name="create_habit_add_week"><u>Add week</u></string>
+    <string name="create_habit_remove_week"><u>Remove week</u></string>
     <string name="create_habit_videos">Videos</string>
     <string name="create_habit_video_non">Video list is empty</string>
     <string name="create_habit_video_non_add"><u>Add video</u></string>
@@ -44,6 +50,22 @@
     <string name="add_habit_details_description">Description</string>
     <string name="add_habit_details_actions">Actions</string>
     <string name="add_habit_details_videos">Videos</string>
+    <string name="add_habit_details_articles">Articles</string>
+
+    <!-- Menu toolbar (Add habit details) -->
+    <string name="menu_add_habit_details_add">Add habit</string>
+    <string name="menu_add_habit_details_create_copy">Create copy</string>
+    <string name="menu_add_habit_details_edit">Edit habit</string>
+    <string name="menu_add_habit_details_create_delete">Delete habit</string>
+
+    <!-- Habit details activity -->
+    <string name="habit_details_status">Status</string>
+    <string name="habit_details_status_wait">Confirmation expected.</string>
+    <string name="habit_details_status_ok">The action is completed for today.</string>
+    <string name="habit_details_reason">Reason</string>
+    <string name="habit_details_reason_empty">Write here, why are you doing this.</string>
+    <string name="edit_reason_title">Edit reason</string>
+    <string name="habit_details_progress">Progress</string>
 
     <!-- Categories names -->
     <string name="category_habit_first">First</string>

@@ -1,18 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:layout_width="54dp"
     android:layout_height="60dp">
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/day_item_fab"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
-        android:layout_centerInParent="true"
-        android:visibility="gone"
-        app:backgroundTint="?attr/colorPrimary"
-        app:elevation="6dp"/>
 
     <com.blakit.petrenko.habits.view.FontTextView
         android:id="@+id/day_item_number"
@@ -21,5 +12,15 @@
         font="OpenSans-Light"
         android:textColor="@color/md_grey_700"
         android:layout_centerInParent="true" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/day_item_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        app:fabSize="mini"
+        app:backgroundTint="?attr/colorPrimary"
+        app:elevation="6dp"/>
 
 </RelativeLayout>

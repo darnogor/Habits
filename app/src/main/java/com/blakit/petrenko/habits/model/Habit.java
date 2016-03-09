@@ -56,7 +56,9 @@ public class Habit extends RealmObject{
         this.name = name;
         this.actions = new RealmList<>();
         for (int i = 0; i < 21; ++i) {
-            this.actions.add(new Action(action, i+1));
+            Action a = new Action(action, i + 1);
+            a.setUseDefault(true);
+            this.actions.add(a);
         }
     }
 

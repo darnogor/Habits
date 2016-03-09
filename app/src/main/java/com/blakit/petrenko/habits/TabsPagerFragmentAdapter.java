@@ -3,7 +3,6 @@ package com.blakit.petrenko.habits;
 import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
 import io.realm.Realm;
@@ -11,7 +10,7 @@ import io.realm.Realm;
 /**
  * Created by user_And on 30.11.2015.
  */
-public class TabsPagerFragmentAdapter extends FragmentPagerAdapter {
+public class TabsPagerFragmentAdapter extends FragmentStatePagerAdapter {
 
     private String[] tabTitles;
     private Realm realm;

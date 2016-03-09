@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menu_add_habit_details_add"
+        android:title="@string/menu_add_habit_details_add"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/menu_add_habit_details_create_copy"
+        android:title="@string/menu_add_habit_details_create_copy"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/menu_add_habit_details_edit"
+        android:title="@string/menu_add_habit_details_edit"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/menu_add_habit_details_delete"
+        android:title="@string/menu_add_habit_details_create_delete"
+        app:showAsAction="never"/>
+
+</menu>
