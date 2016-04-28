@@ -1,47 +1,124 @@
 package com.blakit.petrenko.habits.dao;
 
-import com.blakit.petrenko.habits.model.Action;
-import com.blakit.petrenko.habits.model.Article;
-import com.blakit.petrenko.habits.model.Habit;
-import com.blakit.petrenko.habits.model.VideoItem;
-import com.j256.ormlite.dao.Dao;
+import android.text.TextUtils;
 
-import java.sql.SQLException;
+import com.blakit.petrenko.habits.model.Category;
+import com.blakit.petrenko.habits.model.Habit;
+
+import java.util.List;
+
+import io.realm.Realm;
+import io.realm.RealmQuery;
+import io.realm.RealmResults;
+import io.realm.Sort;
 
 /**
  * Created by user_And on 31.07.2015.
  */
 public class HabitDao {
-    private Dao<Habit, Integer> habitDao;
-    private Dao<Action, Integer> actionDao;
-    private Dao<VideoItem, Integer> videoDao;
-    private Dao<Article, Integer> articleDao;
 
-    public HabitDao(HabitsDBOpenHelper habitsDBOpenHelper) throws SQLException {
-        habitDao = habitsDBOpenHelper.getDao(Habit.class);
-        actionDao = habitsDBOpenHelper.getDao(Action.class);
-        videoDao = habitsDBOpenHelper.getDao(VideoItem.class);
-        articleDao = habitsDBOpenHelper.getDao(Article.class);
+    private Realm realm;
+
+
+    public HabitDao(Realm realm) {
+        this.realm = realm;
     }
 
 
-    public void createOrUpdate(Habit habit) throws SQLException {
-        habitDao.create(habit);
-        for (Action action: habit.getActions()) {
-            action.setHabit(habit);
-            actionDao.create(action);
-        }
-        for (VideoItem video: habit.getRelatedVideoItems()) {
-            video.setHabit(habit);
-            videoDao.create(video);
-        }
-        for (Article article: habit.getRelatedArticles()) {
-            article.setHabit(habit);
-            articleDao.create(article);
-        }
+    public Habit createOrUpdate(final Habit habit) {
+        realm.beginTransaction();
+        Habit updatedHabit = realm.copyToRealmOrUpdate(habit);
+        realm.commitTransaction();
+
+        return updatedHabit;
     }
 
-    public Dao<Habit, Integer> getDao() {
-        return habitDao;
+
+    public List<Habit> getHabits() {
+        return realm.where(Habit.class).findAll();
+    }
+
+
+    public RealmResults<Habit> getPopularHabits(String categoryNameRes) {
+        RealmQuery query = realm.where(Habit.class).equalTo("isDeleted", false);
+
+        if (!TextUtils.isEmpty(categoryNameRes)) {
+            query = query.equalTo("category.nameRes", categoryNameRes);
+        }
+
+        return query.findAllSortedAsync("completeCount", Sort.DESCENDING,
+                "addCount", Sort.DESCENDING, "creationDate", Sort.DESCENDING);
+    }
+
+
+    public RealmResults<Habit> getNewHabits(String categoryNameRes) {
+        RealmQuery query = realm.where(Habit.class).equalTo("isDeleted", false);
+
+        if (!TextUtils.isEmpty(categoryNameRes)) {
+            query = query.equalTo("category.nameRes", categoryNameRes);
+        }
+
+        return query.findAllSortedAsync("creationDate", Sort.DESCENDING);
+    }
+
+
+    public RealmResults<Habit> getHabitsSortedNames(String categoryNameRes) {
+        RealmQuery query = realm.where(Habit.class).equalTo("isDeleted", false);
+
+        if (!TextUtils.isEmpty(categoryNameRes)) {
+            query = query.equalTo("category.nameRes", categoryNameRes);
+        }
+
+        return query.findAllSortedAsync("name", Sort.ASCENDING);
+    }
+
+
+    public RealmResults<Habit> getHabitsBySearchString(String searchString) {
+        return realm.where(Habit.class).equalTo("isDeleted", false)
+                .contains("name", searchString).or()
+                .contains("author", searchString)
+                .findAllSortedAsync("completeCount", Sort.DESCENDING,
+                        "addCount", Sort.DESCENDING);
+    }
+
+
+    public RealmResults<Habit> getCreatedHabits(String userId) {
+        return realm.where(Habit.class)
+                .equalTo("isDeleted", false)
+                .equalTo("author", userId)
+                .findAllSortedAsync("creationDate", Sort.DESCENDING);
+    }
+
+
+    public void setDeleteHabit(final String habitId) {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                Habit habit = realm.where(Habit.class).equalTo("id", habitId).findFirst();
+                if (habit != null) {
+                    habit.setDeleted(true);
+                }
+            }
+        });
+    }
+
+
+    public List<Category> getCategories() {
+        return realm.where(Category.class).findAll();
+    }
+
+
+    public boolean isEmptyCategory() {
+        return realm.where(Category.class).count() == 0;
+    }
+
+
+    public void clearAll() {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                realm.clear(Habit.class);
+            }
+        });
     }
 }

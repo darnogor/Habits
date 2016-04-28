@@ -9,6 +9,7 @@ import android.util.AttributeSet;
 import android.widget.TextView;
 
 import com.blakit.petrenko.habits.R;
+import com.blakit.petrenko.habits.utils.Resources;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -44,8 +45,7 @@ public class FontTextView extends TextView {
                     .obtainStyledAttributes(attrs, R.styleable.FontTextView, 0, 0);
             String fontString = array.getString(R.styleable.FontTextView_font);
             if (fontString != null) {
-                Typeface typeface = Typeface.createFromAsset(context.getAssets(),
-                        "fonts/" + fontString + ".ttf");
+                Typeface typeface = Resources.getInstance().getTypeface(fontString);
                 if (typeface != null) {
                     setTypeface(typeface);
                 }

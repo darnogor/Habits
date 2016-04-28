@@ -1,16 +1,47 @@
 <resources>
     <string name="app_name">Habits</string>
 
+    <!-- Profile -->
+    <string name="profile_name_unknown">No name</string>
+    <string name="profile_level">Level %1$d</string>
+    <string name="profile_status">Status: %1$s</string>
+    <string name="profile_status_beginner">Beginner</string>
+    <string name="profile_status_apprentice">Apprentice</string>
+    <string name="profile_status_best_apprentice">Best apprentice</string>
+    <string name="profile_status_journeyman">Jorneyman</string>
+    <string name="profile_status_master">Master</string>
+    <string name="profile_status_great_master">Great master</string>
+    <string name="profile_status_guru">Guru</string>
+    <string name="profile_google_account">Google account: %1$s</string>
+    <string name="profile_statistics_header">Statistics</string>
+    <string name="profile_statistics_habits">Habits:</string>
+    <string name="profile_statistics_habits_complete">Complete: %1$d</string>
+    <string name="profile_statistics_habits_performed">Performed: %1$d</string>
+    <string name="profile_statistics_habits_zero_progress">With zero progress: %1$d</string>
+    <string name="profile_settings_header">Profile settings</string>
+    <string name="profile_settings_change_nick">Change nickname</string>
+    <string name="profile_settings_change_nick_description">This is unique and will be used when you publish your habits. Click on the box below to change.</string>
+    <string name="profile_settings_nick_non_set">Nickname not specified</string>
+
+
     <!-- Create habit -->
     <string name="create_habit_common">Common</string>
     <string name="create_habit_name">Habit name:</string>
     <string name="create_habit_description">Description:</string>
+    <string name="create_habit_category">Category:</string>
     <string name="create_habit_publish">Send to moderation</string>
     <string name="create_habit_actions">Actions</string>
     <string name="create_habit_actions_default">Default action:</string>
     <string name="create_habit_actions_details">Each day separately</string>
+    <string name="create_habit_day_dialog_action_hint">Action in this day</string>
+    <string name="create_habit_day_dialog_action_warning">Invalid action</string>
+    <string name="create_habit_day_dialog_use_default_check">Set default action</string>
+    <string name="create_habit_day_dialog_skipped_check">Skip this day</string>
     <string name="create_habit_action_not_skipped"><u>The day is not skipped</u></string>
     <string name="create_habit_action_skipped"><u>The day is skipped</u></string>
+    <string name="create_habit_add_week"><u>Add week</u></string>
+    <string name="create_habit_remove_week"><u>Remove week</u></string>
+    <string name="create_habit_remove_week_message">The data may be lost. Are you sure you want to remove last week?</string>
     <string name="create_habit_videos">Videos</string>
     <string name="create_habit_video_non">Video list is empty</string>
     <string name="create_habit_video_non_add"><u>Add video</u></string>
@@ -24,16 +55,110 @@
     <string name="create_habit_article_non">Article list is empty</string>
     <string name="create_habit_article_non_add"><u>Add article</u></string>
     <string name="create_habit_article_dialog_title">Add article</string>
-    <string name="create_habit_youtube_article_url_hint">Url of article</string>
-    <string name="create_habit_youtube_article_name_hint">Article title</string>
+    <string name="create_habit_article_dialog_url_hint">URL of article</string>
+    <string name="create_habit_article_dialog_title_hint">Article title</string>
+    <string name="create_habit_article_dialog_url_present">This article already present</string>
+    <string name="create_habit_article_dialog_url_invalid">Invalid URL</string>
+    <string name="create_habit_article_dialog_title_empty">Title is empty</string>
 
     <string name="create_habit_save_error_dialog_title">Unable to save the habit</string>
     <string name="create_habit_save_error_dialog_message">Not enough data. Fill in all the fields!</string>
+
+
+    <!-- Add habit -->
+    <string name="add_habit_tab_categories">Categories</string>
+    <string name="add_habit_tab_popular">Popular</string>
+    <string name="add_habit_tab_new">New</string>
+    <string name="add_habit_tab_all">All habits</string>
+
+
+    <!-- Add habit details -->
+    <string name="add_habit_details_additional_info">Extras</string>
+    <string name="add_habit_details_additional_info_author">Author: </string>
+    <string name="add_habit_details_additional_info_add_count">Add count: </string>
+    <string name="add_habit_details_additional_info_complete_count">Complete count: </string>
+    <string name="add_habit_details_description">Description</string>
+    <string name="add_habit_details_actions">Actions</string>
+    <string name="add_habit_details_videos">Videos</string>
+    <string name="add_habit_details_articles">Articles</string>
+    <string name="add_habit_details_dialog_add_habit_title">Add habit</string>
+    <string name="add_habit_details_dialog_add_habit_message">Are you sure you want to start this habit?</string>
+    <string name="add_habit_details_dialog_create_copy_title">Create copy</string>
+    <string name="add_habit_details_dialog_create_copy_message">Are you sure you want to create copy of this habit?</string>
+    <string name="add_habit_details_dialog_edit_title">Edit habit</string>
+    <string name="add_habit_details_dialog_edit_message">Are you sure you want to edit this habit?</string>
+    <string name="add_habit_details_dialog_delete_title">Delete habit</string>
+    <string name="add_habit_details_dialog_delete_message">Are you sure you want to delete this habit?</string>
+
+
+    <!-- Show all -->
+    <string name="show_all_videos_title">All videos</string>
+    <string name="show_all_articles_title">All articles</string>
+
+
+    <!-- Menu toolbar (Add habit details) -->
+    <string name="menu_add_habit_details_add">Add habit</string>
+    <string name="menu_add_habit_details_create_copy">Create copy</string>
+    <string name="menu_add_habit_details_edit">Edit habit</string>
+    <string name="menu_add_habit_details_create_delete">Delete habit</string>
+
+
+    <!-- Menu toolbar (Habit details) -->
+    <string name="menu_habit_details_create_copy">Create copy</string>
+    <string name="menu_habit_details_settings">Settings</string>
+
+    <!-- Menu habit item (Add habit) -->
+    <string name="menu_add_habit_item_add">Add habit</string>
+    <string name="menu_add_habit_item_create_copy">Create copy</string>
+
+
+    <!-- Habit item -->
+    <string name="habit_item_progress_status">Status: %1$s</string>
+
+
+    <!-- Habit details activity -->
+    <string name="habit_details_status">Status</string>
+    <string name="habit_details_status_wait">Confirmation expected.</string>
+    <string name="habit_details_status_ok">The action is completed for today.</string>
+    <string name="habit_details_status_complete">Habit complete.</string>
+    <string name="habit_details_reason">Reason</string>
+    <string name="habit_details_reason_empty">Write here, why are you doing this.</string>
+    <string name="edit_reason_title">Edit reason</string>
+    <string name="habit_details_progress">Progress</string>
+    <string name="habit_details_dialog_check_in_title">Check in</string>
+    <string name="habit_details_dialog_check_in_message">Are you sure that you\'ve made today\'s action?</string>
+
+
+    <!-- Settings habit details activity -->
+    <string name="settings_habit_details">Habit settings</string>
+    <string name="settings_habit_details_notifications_header"><b>Notifications</b></string>
+    <string name="settings_habit_details_notifications_on">Enable reminders</string>
+    <string name="settings_habit_details_notifications_on_more">Allow daily reminders for this habit.</string>
+    <string name="settings_habit_details_notifications_time">Reminder time</string>
+    <string name="settings_habit_details_notifications_time_more">Set a time for reminder.</string>
+    <string name="settings_habit_details_cancel_header"><b>Reset and cancel</b></string>
+    <string name="settings_habit_details_reset">Reset the habit</string>
+    <string name="settings_habit_details_reset_more">Reset all progress. Start the habit from the beginning.</string>
+    <string name="settings_habit_details_reset_question">Are you sure you want to reset this habit?</string>
+    <string name="settings_habit_details_cancel">Cancel the habit</string>
+    <string name="settings_habit_details_cancel_more">Bla bla bla.</string>
+    <string name="settings_habit_details_cancel_question">Are you sure you want to cancel this habit?</string>
+
+
+    <!-- Categories names -->
+    <string name="category_healthy_eating">Healthy eating</string>
+    <string name="category_sport">Playing sports</string>
+    <string name="category_bad_habits">Getting rid of bad habits</string>
+    <string name="category_hobby">Hobbies</string>
+    <string name="category_training">Training</string>
+    <string name="category_life_improve">Life improved</string>
+
 
     <!-- Navmenu items -->
     <string name="nav_menu_item_addhabit">Add habit</string>
     <string name="nav_menu_item_myhabits">My habits</string>
     <string name="nav_menu_item_complete">Complete habits</string>
+    <string name="nav_menu_item_created_habits">Created habits</string>
     <string name="nav_menu_item_create">Create habit</string>
     <string name="nav_menu_item_profile">Profile</string>
     <string name="nav_menu_item_settings">Settings</string>
@@ -45,6 +170,8 @@
     <string name="main_activity_exit_toast">Press back again to exit</string>
 
     <string name="title_activity_create_habit">Create habit</string>
+    <string name="title_activity_habit_details_settings">Habit settings</string>
+
 
     <!-- Commons -->
     <string name="hello_world">Hello world!</string>
@@ -52,6 +179,7 @@
     <string name="day">Day</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
+    <string name="show_all">Show all</string>
     <string name="exit_dialog_save_message">Data will be lost. Are you sure you want to exit?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
@@ -59,4 +187,9 @@
     <string name="copy_link">Copy link</string>
     <string name="share">Share...</string>
     <string name="delete">Delete</string>
+    <string name="title_activity_add_habit">AddHabitActivity</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+    <string name="category">Category</string>
+
+
 </resources>

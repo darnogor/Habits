@@ -1,22 +1,91 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorPrimary"
-    tools:context=".MainActivity"
-    android:orientation="vertical">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".MainActivity">
 
-    <include
-        android:id="@+id/toolbar"
-        layout="@layout/toolbar"/>
-
-    <com.blakit.petrenko.habits.view.AutofitGridRecyclerView
-        android:id="@+id/recycler_view"
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="@dimen/item_margin"
-        android:columnWidth="@dimen/column_width"
-        android:clipToPadding="false"
-        android:drawSelectorOnTop="true"
-        android:layoutAnimation="@anim/grid_layout_animation" />
+        android:layout_height="wrap_content">
 
-</LinearLayout>
+        <include
+            android:id="@+id/toolbar"
+            layout="@layout/toolbar"/>
+
+
+    </android.support.design.widget.AppBarLayout>
+
+    <!--<android.support.v4.widget.NestedScrollView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:measureAllChildren="true"-->
+        <!--android:fillViewport="true"-->
+        <!--app:layout_behavior="@string/appbar_scrolling_view_behavior">-->
+
+        <!--<LinearLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:orientation="vertical">-->
+
+            <!--<RelativeLayout-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content">-->
+
+                <!--<Button-->
+                    <!--android:id="@+id/test_button"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="LOAD"/>-->
+
+                <!--<Button-->
+                    <!--android:id="@+id/test_button_delete"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_alignParentRight="true"-->
+                    <!--android:text="DELETE"/>-->
+
+            <!--</RelativeLayout>-->
+
+            <!--<ProgressBar-->
+                <!--android:id="@+id/test_progress"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="35dp"-->
+                <!--style="?android:attr/progressBarStyleHorizontal"-->
+                <!--android:max="100" />-->
+
+            <com.blakit.petrenko.habits.view.AutofitGridRecyclerView
+                android:id="@+id/recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="@dimen/item_margin"
+                android:columnWidth="@dimen/column_width"
+                android:layoutAnimation="@anim/grid_layout_animation"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+            <!--android:clipToPadding="false"-->
+            <!--android:drawSelectorOnTop="true"-->
+
+        <!--</LinearLayout>-->
+
+    <!--</android.support.v4.widget.NestedScrollView>-->
+
+
+
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/main_activity_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:scaleType="center"
+        app:fabSize="normal"
+        app:elevation="7dp"
+        app:layout_anchor="@id/recycler_view"
+        app:layout_anchorGravity="bottom|right|end"
+        app:layout_behavior="com.blakit.petrenko.habits.view.ScrollAwareFabBehavior"
+        app:backgroundTint="@color/md_red_500"/>
+
+
+</android.support.design.widget.CoordinatorLayout>

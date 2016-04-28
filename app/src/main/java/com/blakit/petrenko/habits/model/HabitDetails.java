@@ -1,88 +1,187 @@
 package com.blakit.petrenko.habits.model;
 
-import com.j256.ormlite.dao.ForeignCollection;
-import com.j256.ormlite.field.DataType;
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.ForeignCollectionField;
-import com.j256.ormlite.table.DatabaseTable;
+import android.support.annotation.NonNull;
 
-import java.util.List;
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by user_And on 07.08.2015.
  */
-@DatabaseTable(tableName = "habit_details")
-public class HabitDetails {
+public class HabitDetails extends RealmObject {
 
-    @DatabaseField(foreign = true, foreignAutoRefresh = true, columnName = "user_id")
+    @PrimaryKey
+    private String id;
+
+    private String userId;
+    private String habitId;
+
     private User user;
-
-    @DatabaseField(foreign = true, foreignAutoRefresh = true, columnName = "habit_id")
     private Habit habit;
 
-    @DatabaseField(dataType = DataType.INTEGER, canBeNull = false, columnName = "current_day")
     private int currentDay;
-
-    @DatabaseField(dataType = DataType.BOOLEAN, canBeNull = false, columnName = "checked")
     private boolean isChecked;
+    private boolean isComplete;
 
-    @DatabaseField(dataType = DataType.STRING)
     private String reason;
 
-//    @ForeignCollectionField(eager = true)
-//    private ForeignCollection<VideoItem> myRelatedVideoItems;
-//
-//    @ForeignCollectionField(eager = true)
-//    private ForeignCollection<Article> myRelatedArticles;
-
     //TODO: Add settings of the habit
+    private boolean isNotificationActivated;
+    private String notificationTime;
+
+    private boolean isDeleted;
+    private boolean isSyncronized;
 
 
-    HabitDetails() {}
+    public HabitDetails() {
+    }
+
+
+    public HabitDetails(@NonNull User user, @NonNull Habit habit) {
+        this.userId = user.getName();
+        this.habitId = habit.getId();
+        this.id = userId + "_" + habitId;
+        this.user = user;
+        this.habit = habit;
+
+        this.currentDay = 1;
+        this.isChecked = false;
+        this.isComplete = false;
+
+        this.isNotificationActivated = true;
+        this.notificationTime = "12:00";
+
+        this.isDeleted = false;
+        this.isSyncronized = false;
+    }
+
+
+    public String getId() {
+        return id;
+    }
+
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+
+    public String getUserId() {
+        return userId;
+    }
+
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+
+    public String getHabitId() {
+        return habitId;
+    }
+
+
+    public void setHabitId(String habitId) {
+        this.habitId = habitId;
+    }
+
 
     public User getUser() {
         return user;
     }
 
+
     public void setUser(User user) {
         this.user = user;
     }
+
 
     public Habit getHabit() {
         return habit;
     }
 
+
     public void setHabit(Habit habit) {
         this.habit = habit;
     }
+
 
     public int getCurrentDay() {
         return currentDay;
     }
 
+
     public void setCurrentDay(int currentDay) {
         this.currentDay = currentDay;
     }
+
 
     public boolean isChecked() {
         return isChecked;
     }
 
-    public void setIsChecked(boolean isChecked) {
+
+    public void setChecked(boolean isChecked) {
         this.isChecked = isChecked;
     }
+
+
+    public boolean isComplete() {
+        return isComplete;
+    }
+
+
+    public void setComplete(boolean complete) {
+        isComplete = complete;
+    }
+
 
     public String getReason() {
         return reason;
     }
+
 
     public void setReason(String reason) {
         this.reason = reason;
     }
 
 
-    public String getTodayAction() {
-        Action todayAction = habit.getAction(currentDay);
-        return todayAction.getAction();
+    public boolean isNotificationActivated() {
+        return isNotificationActivated;
+    }
+
+
+    public void setNotificationActivated(boolean isNotificationActivated) {
+        this.isNotificationActivated = isNotificationActivated;
+    }
+
+
+    public String getNotificationTime() {
+        return notificationTime;
+    }
+
+
+    public void setNotificationTime(String notificationTime) {
+        this.notificationTime = notificationTime;
+    }
+
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+
+    public void setDeleted(boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+
+
+    public boolean isSyncronized() {
+        return isSyncronized;
+    }
+
+
+    public void setSyncronized(boolean isSyncronized) {
+        this.isSyncronized = isSyncronized;
     }
 }

@@ -4,8 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="?attr/colorPrimary"
-    tools:context=".MainActivity">
+    android:background="?attr/android:windowBackground"
+    tools:context=".CreateHabitActivity">
 
 
     <android.support.design.widget.AppBarLayout
@@ -75,6 +75,20 @@
                         style="@style/EditTextTheme.Size"
                         android:theme="@style/EditTextTheme"/>
 
+                    <com.blakit.petrenko.habits.view.FontTextView
+                        style="@style/CreateTheme.Normal.Font"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/create_habit_category"/>
+
+
+                    <Spinner
+                        android:id="@+id/create_habit_category_spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@android:style/Widget.Holo.Light.Spinner"
+                        android:layout_margin="14dp"/>
+
                     <CheckBox
                         android:id="@+id/create_habit_send_checkbox"
                         style="@style/CheckBoxTheme.Size"
@@ -109,7 +123,8 @@
 
 
                     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                        android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
                         android:id="@+id/create_habit_actions_details_header">
 
                         <com.blakit.petrenko.habits.view.FontTextView
@@ -131,12 +146,65 @@
 
                     </RelativeLayout>
 
-
-                    <LinearLayout
+                    <RelativeLayout
                         android:id="@+id/create_habit_actions_details"
-                        android:orientation="vertical"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
+                        android:layout_height="wrap_content"
+                        android:paddingBottom="5dp">
+
+                        <android.support.v7.widget.RecyclerView
+                            android:id="@+id/create_habit_days_recycler"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="5dp"
+                            android:layout_marginBottom="8dp"/>
+
+                        <com.mikepenz.iconics.view.IconicsImageView
+                            android:id="@+id/create_habit_add_week_icon"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="10dp"
+                            android:layout_marginLeft="13dp"
+                            android:layout_below="@+id/create_habit_days_recycler"
+                            app:iiv_icon="gmd-add"
+                            app:iiv_color="@color/md_grey_600"
+                            app:iiv_size="15dp"/>
+
+                        <com.blakit.petrenko.habits.view.FontTextView
+                            android:id="@+id/create_habit_add_week"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/CreateTheme.Small"
+                            android:text="@string/create_habit_add_week"
+                            android:paddingTop="7dp"
+                            android:paddingBottom="7dp"
+                            android:layout_below="@+id/create_habit_days_recycler"
+                            android:layout_toRightOf="@+id/create_habit_add_week_icon"/>
+
+                        <com.mikepenz.iconics.view.IconicsImageView
+                            android:id="@+id/create_habit_remove_week_icon"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="10dp"
+                            android:layout_below="@+id/create_habit_days_recycler"
+                            android:layout_toLeftOf="@+id/create_habit_remove_week"
+                            app:iiv_icon="gmd-clear"
+                            app:iiv_color="@color/md_grey_600"
+                            app:iiv_size="14dp"/>
+
+                        <com.blakit.petrenko.habits.view.FontTextView
+                            android:id="@+id/create_habit_remove_week"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/CreateTheme.Small"
+                            android:text="@string/create_habit_remove_week"
+                            android:paddingTop="7dp"
+                            android:paddingBottom="7dp"
+                            android:layout_marginRight="13dp"
+                            android:layout_alignParentRight="true"
+                            android:layout_below="@+id/create_habit_days_recycler" />
+
+                    </RelativeLayout>
 
                     <View
                         android:layout_width="match_parent"
@@ -159,10 +227,11 @@
                             android:id="@+id/create_habit_add_video"
                             android:layout_width="20dp"
                             android:layout_height="20dp"
-                            app:iiv_color="@color/md_grey_600"
+                            android:foreground="?attr/selectableItemBackground"
                             android:layout_alignParentRight="true"
                             android:layout_marginTop="10dp"
-                            android:layout_marginRight="14dp"/>
+                            android:layout_marginRight="14dp"
+                            app:iiv_color="@color/md_grey_600"/>
 
                     </RelativeLayout>
 
@@ -189,11 +258,12 @@
                             android:layout_marginBottom="5dp" />
 
                         <TextView
+                            android:id="@+id/create_habit_video_non_add"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:foreground="?attr/selectableItemBackground"
                             style="@style/CreateTheme.Small"
                             android:text="@string/create_habit_video_non_add"
-                            android:id="@+id/create_habit_video_non_add"
                             android:layout_marginBottom="18dp"
                             android:layout_gravity="center_horizontal" />
 
@@ -230,10 +300,11 @@
                             android:id="@+id/create_habit_add_article"
                             android:layout_width="20dp"
                             android:layout_height="20dp"
-                            app:iiv_color="@color/md_grey_600"
+                            android:foreground="?attr/selectableItemBackground"
                             android:layout_alignParentRight="true"
                             android:layout_marginRight="14dp"
-                            android:layout_marginTop="10dp" />
+                            android:layout_marginTop="10dp"
+                            app:iiv_color="@color/md_grey_600" />
 
                     </RelativeLayout>
 
@@ -260,13 +331,14 @@
                             android:layout_marginBottom="5dp" />
 
                         <TextView
+                            android:id="@+id/create_habit_article_non_add"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:foreground="?attr/selectableItemBackground"
                             style="@style/CreateTheme.Small"
-                            android:text="@string/create_habit_article_non_add"
-                            android:id="@+id/create_habit_article_non_add"
                             android:layout_marginBottom="18dp"
-                            android:layout_gravity="center_horizontal" />
+                            android:layout_gravity="center_horizontal"
+                            android:text="@string/create_habit_article_non_add" />
 
                     </LinearLayout>
 
@@ -284,15 +356,16 @@
     </android.support.v4.widget.NestedScrollView>
 
     <android.support.design.widget.FloatingActionButton
+        android:id="@+id/create_habit_save"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         app:fabSize="normal"
         app:elevation="4dp"
-        app:backgroundTint="@color/colorPrimaryDark"
+        app:backgroundTint="?attr/colorPrimary"
         app:layout_anchor="@id/create_habit_card"
         app:layout_anchorGravity="bottom|right|end"
-        android:id="@+id/create_habit_save"
+        app:layout_behavior="com.blakit.petrenko.habits.view.ScrollAwareFabBehavior"
         />
 
 

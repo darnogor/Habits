@@ -1,220 +1,232 @@
 package com.blakit.petrenko.habits.model;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
-import com.blakit.petrenko.habits.HabitApplication;
-import com.blakit.petrenko.habits.dao.HabitDao;
-import com.j256.ormlite.field.DataType;
-import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.ForeignCollectionField;
-import com.j256.ormlite.table.DatabaseTable;
+import com.blakit.petrenko.habits.model.converters.ActionListParcelConverter;
+import com.blakit.petrenko.habits.model.converters.ArticleListParcelConverter;
+import com.blakit.petrenko.habits.model.converters.VideoItemParcelConverter;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
+import org.parceler.Parcel;
+import org.parceler.ParcelPropertyConverter;
+
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
+
+import io.realm.HabitRealmProxy;
+import io.realm.RealmList;
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by user_And on 15.07.2015.
  */
-@DatabaseTable(tableName = "habits")
-public class Habit implements Parcelable {
+@Parcel(implementations = { HabitRealmProxy.class },
+        value = Parcel.Serialization.BEAN,
+        analyze = { Habit.class })
+public class Habit extends RealmObject{
 
-    @DatabaseField(generatedId = true)
-    private long id;
-
-    @DatabaseField(dataType = DataType.STRING, canBeNull = false)
+    @PrimaryKey
+    private String id;
     private String name;
-
-    @DatabaseField(dataType = DataType.STRING)
     private String author;
-
-    @DatabaseField(dataType = DataType.BOOLEAN)
     private boolean isPublic;
-
-    @DatabaseField(dataType = DataType.STRING, canBeNull = false)
     private String description;
+    private Category category;
+    private String defaultAction;
+    private RealmList<Action> actions;
+    private RealmList<VideoItem> relatedVideoItems;
+    private RealmList<Article> relatedArticles;
 
-    @ForeignCollectionField(eager = true, columnName = "actions")
-    private Collection<Action> actions;
+    private int addCount;
+    private int completeCount;
 
-    @ForeignCollectionField(eager = true, columnName = "related_videos")
-    private Collection<VideoItem> relatedVideoItems;
+    private Date creationDate;
 
-    @ForeignCollectionField(eager = true, columnName = "related_articles")
-    private Collection<Article> relatedArticles;
+    private boolean isDeleted;
+    private boolean isSyncronized;
 
-
-    private boolean isRootParcelable = true;
-
-    Habit() {}
-
-    public Habit(String name, String action) {
-        try {
-            HabitDao dao = HabitApplication.getInstance().getDbOpenHelper().getHabitDao();
-            this.name = name;
-            this.actions = dao.getDao().getEmptyForeignCollection("actions");
-            for (int i = 0; i < 21; ++i) {
-                this.actions.add(new Action(action, i));
-            }
-            this.relatedVideoItems = dao.getDao().getEmptyForeignCollection("related_videos");
-            this.relatedArticles = dao.getDao().getEmptyForeignCollection("related_articles");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    public Habit() {
+        this.id = UUID.randomUUID().toString();
+        this.relatedVideoItems = new RealmList<>();
+        this.relatedArticles = new RealmList<>();
+        this.addCount = 0;
+        this.completeCount = 0;
+        this.creationDate = new Date();
+        this.isDeleted = false;
+        this.isSyncronized = false;
     }
 
-    public Habit(String name, List<Action> actions) {
+    public Habit(@NonNull String name, String action) {
+        this();
         this.name = name;
-        this.actions = actions;
-        this.relatedVideoItems = new ArrayList<>();
-        this.relatedArticles = new ArrayList<>();
-    }
-
-    public Habit(Parcel source) {
-        try {
-            HabitDao dao = HabitApplication.getInstance().getDbOpenHelper().getHabitDao();
-            id = source.readInt();
-            name = source.readString();
-            author = source.readString();
-            description = source.readString();
-            isPublic = source.readByte() == 1;
-
-            Collection<Action> newActionList = dao.getDao().getEmptyForeignCollection("actions");
-            for (int i = 0; i < source.readInt(); ++i) {
-                newActionList.add((Action) source.readSerializable());
-            }
-            actions = newActionList;
-
-            Collection<VideoItem> newVideoList = dao.getDao().getEmptyForeignCollection("related_videos");
-            for (int i = 0; i < source.readInt(); i++) {
-                newVideoList.add((VideoItem) source.readParcelable(VideoItem.class.getClassLoader()));
-            }
-            relatedVideoItems = newVideoList;
-
-            Collection<Article> newArticleList = dao.getDao().getEmptyForeignCollection("related_articles");
-            for (int i = 0; i < source.readInt(); ++i) {
-                newArticleList.add((Article) source.readSerializable());
-            }
-            relatedArticles = newArticleList;
-        } catch (SQLException e) {
-            e.printStackTrace();
+        this.defaultAction = action;
+        this.actions = new RealmList<>();
+        for (int i = 0; i < 21; ++i) {
+            Action a = new Action(action, i + 1);
+            a.setUseDefault(true);
+            this.actions.add(a);
         }
     }
 
-    public long getId() {
+    public Habit(@NonNull String name, List<Action> actions) {
+        this();
+        this.name = name;
+        this.actions = new RealmList<>();
+        for (Action a: actions) {
+            this.actions.add(a);
+        }
+    }
+
+
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+
+    public void setId(String id) {
         this.id = id;
     }
+
 
     public String getName() {
         return name;
     }
 
+
     public void setName(String name) {
         this.name = name;
     }
+
 
     public String getAuthor() {
         return author;
     }
 
+
     public void setAuthor(String author) {
         this.author = author;
     }
+
 
     public boolean isPublic() {
         return isPublic;
     }
 
-    public void setIsPublic(boolean isPublic) {
+
+    public void setPublic(boolean isPublic) {
         this.isPublic = isPublic;
     }
+
 
     public String getDescription() {
         return description;
     }
 
+
     public void setDescription(String description) {
         this.description = description;
     }
 
-    public Collection<Action> getActions() {
+
+    public Category getCategory() {
+        return category;
+    }
+
+
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+
+
+    public RealmList<Action> getActions() {
         return actions;
     }
 
-    public void setActions(List<Action> actions) {
-        this.actions = actions;
-    }
 
-    public Collection<VideoItem> getRelatedVideoItems() {
+    public RealmList<VideoItem> getRelatedVideoItems() {
         return relatedVideoItems;
     }
 
-    public void setRelatedVideoItems(List<VideoItem> relatedVideoItems) {
-        this.relatedVideoItems = relatedVideoItems;
-    }
 
-    public Collection<Article> getRelatedArticles() {
+    public RealmList<Article> getRelatedArticles() {
         return relatedArticles;
     }
 
-    public void setRelatedArticles(List<Article> relatedArticles) {
+
+    public int getAddCount() {
+        return addCount;
+    }
+
+
+    public void setAddCount(int addCount) {
+        this.addCount = addCount;
+    }
+
+
+    public String getDefaultAction() {
+        return defaultAction;
+    }
+
+
+    public void setDefaultAction(String defaultAction) {
+        this.defaultAction = defaultAction;
+    }
+
+
+    public int getCompleteCount() {
+        return completeCount;
+    }
+
+
+    public void setCompleteCount(int completeCount) {
+        this.completeCount = completeCount;
+    }
+
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
+
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+
+    public void setDeleted(boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+
+
+    public boolean isSyncronized() {
+        return isSyncronized;
+    }
+
+
+    public void setSyncronized(boolean isSyncronized) {
+        this.isSyncronized = isSyncronized;
+    }
+
+
+    @ParcelPropertyConverter(ActionListParcelConverter.class)
+    public void setActions(RealmList<Action> actions) {
+        this.actions = actions;
+    }
+
+
+    @ParcelPropertyConverter(VideoItemParcelConverter.class)
+    public void setRelatedVideoItems(RealmList<VideoItem> relatedVideoItems) {
+        this.relatedVideoItems = relatedVideoItems;
+    }
+
+    @ParcelPropertyConverter(ArticleListParcelConverter.class)
+    public void setRelatedArticles(RealmList<Article> relatedArticles) {
         this.relatedArticles = relatedArticles;
     }
-
-    public Action getAction(int day) {
-        for (Action a: actions) {
-            if (a.getDay() == day) {
-                return a;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        if(!isRootParcelable) {
-            return;
-        }
-        isRootParcelable = false;
-        dest.writeLong(id);
-        dest.writeString(name);
-        dest.writeString(author);
-        dest.writeString(description);
-        dest.writeByte((byte) (isPublic ? 1 : 0));
-        dest.writeInt(actions.size());
-        for (Action action : actions) {
-            dest.writeSerializable(action);
-        }
-        dest.writeInt(relatedVideoItems.size());
-        for (VideoItem video: relatedVideoItems) {
-            dest.writeParcelable(video, flags);
-        }
-        dest.writeInt(relatedArticles.size());
-        for (Article article: relatedArticles) {
-            dest.writeSerializable(article);
-        }
-    }
-
-    public static Creator<Habit> CREATOR = new Creator<Habit>() {
-        @Override
-        public Habit createFromParcel(Parcel source) {
-            return new Habit(source);
-        }
-
-        @Override
-        public Habit[] newArray(int size) {
-            return new Habit[size];
-        }
-    };
 }

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menu_habit_details_notify"
+        android:title="Notifications"
+        app:showAsAction="always"/>
+
+    <item
+        android:id="@+id/menu_habit_details_create_copy"
+        android:title="@string/menu_habit_details_create_copy"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_habit_details_settings"
+        android:title="@string/menu_habit_details_settings"
+        app:showAsAction="never"/>
+
+</menu>

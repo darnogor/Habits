@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/menu_add_habit_item_add"
+          android:title="@string/menu_add_habit_item_add" />
+    <item android:id="@+id/menu_add_habit_item_create_copy"
+          android:title="@string/menu_add_habit_item_create_copy" />
+</menu>

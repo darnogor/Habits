@@ -6,7 +6,9 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="margin_decoration">5dp</dimen>
     <dimen name="item_margin">5dp</dimen>
-    <dimen name="column_width">170dp</dimen>
+    <dimen name="column_width">165dp</dimen>
     <dimen name="top_block_height">160dp</dimen>
     <dimen name="bottom_block_height">60dp</dimen>
+
+    <dimen name="add_habit_details_header_height">170dp</dimen>
 </resources>

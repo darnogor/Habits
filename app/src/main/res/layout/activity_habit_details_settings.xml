@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/md_white_1000"
+    tools:context=".HabitDetailsSettingsActivity">
+
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/toolbar"/>
+
+    <com.blakit.petrenko.habits.view.FontTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/SettingsTheme.Header.Font"
+        android:text="@string/settings_habit_details_notifications_header"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/md_grey_400"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"/>
+
+    <LinearLayout
+        android:id="@+id/settings_habit_details_notifications_on"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:clickable="true"
+        android:background="?attr/selectableItemBackground">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="1">
+
+            <com.blakit.petrenko.habits.view.FontTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/SettingsTheme.PrimaryText.Font"
+                android:text="@string/settings_habit_details_notifications_on"/>
+
+            <com.blakit.petrenko.habits.view.FontTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/SettingsTheme.SecondaryText.Font"
+                android:text="@string/settings_habit_details_notifications_on_more"/>
+
+        </LinearLayout>
+
+        <CheckBox
+            android:id="@+id/settings_habit_details_notifications_on_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/CheckBoxTheme.Size"
+            android:theme="@style/CheckBoxTheme"
+            android:clickable="false"
+            android:focusable="false"
+            android:checked="true"/>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:background="@color/md_grey_300"/>
+
+    <LinearLayout
+        android:id="@+id/settings_habit_details_notifications_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:clickable="true"
+        android:background="?attr/selectableItemBackground">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="1">
+
+            <com.blakit.petrenko.habits.view.FontTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/SettingsTheme.PrimaryText.Font"
+                android:text="@string/settings_habit_details_notifications_time"/>
+
+            <com.blakit.petrenko.habits.view.FontTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/SettingsTheme.SecondaryText.Font"
+                android:text="@string/settings_habit_details_notifications_time_more"/>
+
+        </LinearLayout>
+
+        <com.blakit.petrenko.habits.view.FontTextView
+            android:id="@+id/settings_habit_details_notifications_time_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_margin="14dp"
+            font="OpenSans-Regular"
+            android:textSize="24sp"
+            android:text="00:00"/>
+
+    </LinearLayout>
+
+    <com.blakit.petrenko.habits.view.FontTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/SettingsTheme.Header.Font"
+        android:text="@string/settings_habit_details_cancel_header"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/md_grey_400"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"/>
+
+    <LinearLayout
+        android:id="@+id/settings_habit_details_reset"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:clickable="true"
+        android:background="?attr/selectableItemBackground">
+
+        <com.blakit.petrenko.habits.view.FontTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/SettingsTheme.PrimaryText.Font"
+            android:text="@string/settings_habit_details_reset"/>
+
+        <com.blakit.petrenko.habits.view.FontTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/SettingsTheme.SecondaryText.Font"
+            android:text="@string/settings_habit_details_reset_more"/>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:background="@color/md_grey_300"/>
+
+    <LinearLayout
+        android:id="@+id/settings_habit_details_cancel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:clickable="true"
+        android:background="?attr/selectableItemBackground">
+
+        <com.blakit.petrenko.habits.view.FontTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/SettingsTheme.PrimaryText.Font"
+            android:text="@string/settings_habit_details_cancel"/>
+
+        <com.blakit.petrenko.habits.view.FontTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/SettingsTheme.SecondaryText.Font"
+            android:text="@string/settings_habit_details_cancel_more"/>
+
+    </LinearLayout>
+
+</LinearLayout>

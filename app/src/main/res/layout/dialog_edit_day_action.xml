@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="10dp" />
+
+
+    <EditText
+        android:id="@+id/create_habit_day_dialog_action"
+        style="@style/EditTextTheme.Size.Bottom"
+        android:theme="@style/EditTextTheme"
+        android:hint="@string/create_habit_day_dialog_action_hint"
+        android:textColorHint="@color/md_white_1000"/>
+
+    <TextView
+        android:id="@+id/create_habit_day_dialog_action_warning"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        style="@style/CreateTheme.Small"
+        android:paddingTop="0dp"
+        android:text="@string/create_habit_day_dialog_action_warning"
+        android:visibility="gone"
+        android:layout_marginRight="18dp" />
+
+    <CheckBox
+        android:id="@+id/create_habit_day_dialog_use_default"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/textColor"
+        android:layout_marginTop="3dp"
+        android:layout_marginLeft="14dp"
+        android:theme="@style/CheckBoxTheme"
+        android:textAppearance="@style/CreateTheme.Normal.Min"
+        android:text="@string/create_habit_day_dialog_use_default_check"/>
+
+    <CheckBox
+        android:id="@+id/create_habit_day_dialog_skipped"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/textColor"
+        android:layout_marginTop="1dp"
+        android:layout_marginLeft="14dp"
+        android:theme="@style/CheckBoxTheme"
+        android:textAppearance="@style/CreateTheme.Normal.Min"
+        android:text="@string/create_habit_day_dialog_skipped_check"/>
+
+
+</LinearLayout>
