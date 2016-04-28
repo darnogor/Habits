@@ -7,9 +7,12 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Patterns;
@@ -29,6 +32,8 @@ import com.blakit.petrenko.habits.model.HabitDetails;
 import org.joda.time.Period;
 import org.joda.time.format.ISOPeriodFormat;
 import org.joda.time.format.PeriodFormatter;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -36,6 +41,9 @@ import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -53,12 +61,12 @@ public class Utils {
     @ColorInt
     private static final int[] PROGRESS_COLORS = {
             0xffef5350,
-            0xffffa726,
-            0xffffca28,
-            0xffffee58,
-            0xffd4e157,
-            0xff9ccc65,
-            0xff66bb6a,
+            0xfff06292,
+            0xffba68c8,
+            0xff9575cd,
+            0xff42a5f5,
+            0xff1de9b6,
+            0xff00e676,
             0xff4caf50
     };
 
@@ -421,33 +429,125 @@ public class Utils {
     }
 
 
-    public static String parseTitleByURL(String urlStr) {
+    public static void parseTitleByURL(String urlStr, final Callable<String, Void> callable, final View progressView) {
+        if (!urlStr.startsWith("http://") && !urlStr.startsWith("https://")) {
+            urlStr = "http://" + urlStr;
+        }
+
+        new AsyncTask<String, Void, String>() {
+            @Override
+            protected void onPreExecute() {
+                progressView.setVisibility(View.VISIBLE);
+            }
+
+
+            @Override
+            protected String doInBackground(String... params) {
+                Document document = null;
+                try {
+                    document = Jsoup.connect(params[0]).get();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                if (document != null) {
+                    return document.title();
+                }
+
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                progressView.setVisibility(View.GONE);
+                callable.call(s);
+            }
+
+        }.execute(urlStr);
+    }
+
+
+    public static void parseTitleByURLRegEx(String urlStr, final Callable<String, Void> callable) {
         final Pattern TITLE_TAG =
                 Pattern.compile("\\<title>(.*)\\</title>", Pattern.CASE_INSENSITIVE|Pattern.DOTALL);
 
+        new AsyncTask<String, Void, String>() {
+            @Override
+            protected String doInBackground(String... params) {
+                try {
+                    URL url = new URL(params[0]);
+                    URLConnection urlConnection = url.openConnection();
+                    DataInputStream dis = new DataInputStream(urlConnection.getInputStream());
+
+                    String html = "", tmp;
+                    while ((tmp = dis.readUTF()) != null) {
+                        html += " " + tmp;
+                    }
+                    dis.close();
+
+                    html = html.replaceAll("\\s+", " ");
+                    Matcher m = TITLE_TAG.matcher(html);
+
+                    if (m.find() == true) {
+                        return m.group(1);
+                    }
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                callable.call(s);
+            }
+        }.execute(urlStr);
+    }
+
+
+    public static Date parseDate(String dateStr) {
+        SimpleDateFormat format = new SimpleDateFormat("HH:mm");
+        Date date = new Date();
         try {
-            URL url = new URL(urlStr);
-            URLConnection urlConnection = url.openConnection();
-            DataInputStream dis = new DataInputStream(urlConnection.getInputStream());
-
-            String html = "", tmp = "";
-            while ((tmp = dis.readUTF()) != null) {
-                html += " " + tmp;
+            if (TextUtils.isEmpty(dateStr)) {
+                date = format.parse("00:00");
             }
-            dis.close();
-
-            html = html.replaceAll("\\s+", " ");
-            Matcher m = TITLE_TAG.matcher(html);
-
-            while (m.find() == true) {
-                return m.group(1);
+            else {
+                date = format.parse(dateStr);
             }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (ParseException e) {
+            try {
+                date = format.parse("00:00");
+            } catch (ParseException e1) {
+                e1.printStackTrace();
+            }
         }
 
-        return null;
+        return date;
+    }
+
+
+    public static String getProfileStatusName(Context context, int level) {
+        if (level <= 0) {
+            level = 1;
+        }
+        if (level >= 22) {
+            level = 21;
+        }
+
+        @StringRes
+        int[] statusNamesRes = {
+            R.string.profile_status_beginner,
+            R.string.profile_status_apprentice,
+            R.string.profile_status_best_apprentice,
+            R.string.profile_status_journeyman,
+            R.string.profile_status_master,
+            R.string.profile_status_great_master,
+            R.string.profile_status_guru
+        };
+
+        return context.getString(statusNamesRes[(level - 1) / 3]);
     }
 }

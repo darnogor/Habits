@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:clickable="true"
+    android:background="?attr/selectableItemBackground">
+
+    <TextView
+        android:id="@+id/create_habit_article_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginRight="26dp"
+        android:ellipsize="end"
+        android:textAppearance="@style/CreateTheme.Normal" />
+
+    <TextView
+        android:id="@+id/create_habit_article_url"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:paddingLeft="8dp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        style="@style/VideoItem.Small"
+        android:layout_below="@+id/create_habit_article_title"/>
+
+    <com.mikepenz.iconics.view.IconicsImageView
+        android:id="@+id/create_habit_article_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_alignParentRight="true"
+        app:iiv_color="@color/icon_color_states"
+        app:iiv_size="34dp"
+        app:iiv_padding="8dp"
+        app:iiv_icon="gmd-more-vert"/>
+
+</RelativeLayout>

@@ -35,43 +35,53 @@ public class Action extends RealmObject {
         this.isUseDefault = false;
     }
 
+
     public String getId() {
         return id;
     }
+
 
     public void setId(String id) {
         this.id = id;
     }
 
+
     public String getAction() {
         return action;
     }
+
 
     public void setAction(String action) {
         this.action = action;
     }
 
+
     public int getDay() {
         return day;
     }
+
 
     public void setDay(int day) {
         this.day = day;
     }
 
-    public boolean isSkipped() {
-        return isSkipped;
-    }
-
-    public void setSkipped(boolean isSkipped) {
-        this.isSkipped = isSkipped;
-    }
 
     public boolean isUseDefault() {
         return isUseDefault;
     }
 
+
     public void setUseDefault(boolean isUseDefault) {
         this.isUseDefault = isUseDefault;
+    }
+
+
+    public boolean isSkipped() {
+        return isSkipped;
+    }
+
+
+    public void setSkipped(boolean isSkipped) {
+        this.isSkipped = isSkipped;
     }
 }

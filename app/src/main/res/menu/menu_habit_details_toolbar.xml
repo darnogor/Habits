@@ -8,8 +8,13 @@
         app:showAsAction="always"/>
 
     <item
+        android:id="@+id/menu_habit_details_create_copy"
+        android:title="@string/menu_habit_details_create_copy"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/menu_habit_details_settings"
-        android:title="Settings"
+        android:title="@string/menu_habit_details_settings"
         app:showAsAction="never"/>
 
 </menu>

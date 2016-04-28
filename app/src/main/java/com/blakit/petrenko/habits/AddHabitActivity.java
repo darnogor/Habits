@@ -8,18 +8,19 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.ScaleAnimation;
 import android.widget.Toast;
 
-import com.blakit.petrenko.habits.dao.HabitDao;
+import com.blakit.petrenko.habits.adapter.TabsPagerFragmentAdapter;
 import com.blakit.petrenko.habits.dao.UserDao;
 import com.blakit.petrenko.habits.model.SearchHistory;
+import com.blakit.petrenko.habits.model.User;
 import com.blakit.petrenko.habits.utils.Utils;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
@@ -35,13 +36,15 @@ import io.realm.Sort;
 public class AddHabitActivity extends AppCompatActivity {
 
     private Realm realm;
-    private HabitDao habitDao;
+
+    private User user;
 
     private AppBarLayout appBarLayout;
     private TabLayout tabLayout;
     private SearchBox search;
     private View dimView;
 
+    private String categoryNameRes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,13 +53,19 @@ public class AddHabitActivity extends AppCompatActivity {
 
         realm = Realm.getDefaultInstance();
 
+        user = new UserDao(realm).getUserByName(HabitApplication.getInstance().getUsername());
+
+        categoryNameRes = getIntent().getStringExtra("category");
+
         initToolbar();
         initTabs();
     }
 
 
     private void initTabs() {
-        TabsPagerFragmentAdapter adapter = new TabsPagerFragmentAdapter(this, getSupportFragmentManager(), realm);
+        TabsPagerFragmentAdapter adapter = new TabsPagerFragmentAdapter(this,
+                getSupportFragmentManager(), realm, categoryNameRes);
+
         ViewPager viewPager = (ViewPager) findViewById(R.id.add_habit_viewPager);
         viewPager.setAdapter(adapter);
 
@@ -91,8 +100,12 @@ public class AddHabitActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.add_habit_toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
-            getSupportActionBar().setTitle(R.string.nav_menu_item_addhabit);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            if (TextUtils.isEmpty(categoryNameRes)) {
+                getSupportActionBar().setTitle(R.string.nav_menu_item_addhabit);
+            } else {
+                getSupportActionBar().setTitle(Utils.getStringByResName(this, categoryNameRes));
+            }
         }
 
         search = (SearchBox) findViewById(R.id.searchbox);
@@ -179,7 +192,7 @@ public class AddHabitActivity extends AppCompatActivity {
 
         search.revealFromMenuItem(R.id.action_search, this);
 
-        List<SearchHistory> historyList = HabitApplication.getInstance().getUser().getSearchHistories()
+        List<SearchHistory> historyList = user.getSearchHistories()
                 .where().findAllSorted("date", Sort.DESCENDING);
         for (SearchHistory history: historyList) {
             String result = history.getWord();
@@ -267,19 +280,21 @@ public class AddHabitActivity extends AppCompatActivity {
 
 
     private void startSearchActivity(String searchStr) {
+        UserDao userDao = new UserDao(realm);
+
         if (!search.isSearchablesHasString(searchStr)) {
             search.addSearchableFront(new SearchResult(searchStr,
                     new IconicsDrawable(AddHabitActivity.this)
                             .icon(GoogleMaterial.Icon.gmd_history)
                             .colorRes(R.color.md_grey_600)
                             .sizeDp(30)));
-            HabitApplication.getInstance().updateCurrentUserSearchHistory(new UserDao(realm), searchStr);
+            userDao.updateUserSearchHistory(user, searchStr);
         } else {
-            HabitApplication.getInstance().updateCurrentUserPresentSearchHistory(new UserDao(realm), searchStr);
+            userDao.updatePresentUserSearchHistory(user, searchStr);
         }
+
         Intent intent = new Intent(this, SearchActivity.class);
         intent.putExtra("search_str", searchStr);
-
 
 //        dimView.setVisibility(View.GONE);
 //        appBarLayout.setVisibility(View.VISIBLE);

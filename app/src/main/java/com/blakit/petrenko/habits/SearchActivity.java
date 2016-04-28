@@ -9,13 +9,16 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Toast;
 
+import com.blakit.petrenko.habits.adapter.HabitAdapter;
 import com.blakit.petrenko.habits.dao.HabitDao;
 import com.blakit.petrenko.habits.dao.UserDao;
 import com.blakit.petrenko.habits.model.Habit;
+import com.blakit.petrenko.habits.model.HabitDetails;
 import com.blakit.petrenko.habits.model.SearchHistory;
+import com.blakit.petrenko.habits.model.User;
 import com.blakit.petrenko.habits.utils.Utils;
 import com.blakit.petrenko.habits.view.FontTextView;
-import com.blakit.petrenko.habits.view.MarginDecoration;
+import com.blakit.petrenko.habits.view.decoration.MarginDecoration;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.quinny898.library.persistentsearch.SearchBox;
@@ -33,7 +36,9 @@ import io.realm.Sort;
 public class SearchActivity extends AppCompatActivity {
 
     private Realm realm;
+    private User user;
     private RealmResults<Habit> habits;
+    private RealmResults<HabitDetails> habitDetailses;
 
     private HabitAdapter adapter;
     private RecyclerView recyclerView;
@@ -49,6 +54,8 @@ public class SearchActivity extends AppCompatActivity {
         setContentView(R.layout.activity_search);
 
         realm = Realm.getDefaultInstance();
+
+        user = new UserDao(realm).getUserByName(HabitApplication.getInstance().getUsername());
 
         if (savedInstanceState != null) {
             searchStack = (Stack<String>) savedInstanceState.getSerializable("search_stack");
@@ -134,23 +141,24 @@ public class SearchActivity extends AppCompatActivity {
         if (searchStack.peek().equals(searchStr)) {
             return;
         }
+        UserDao userDao = new UserDao(realm);
+
         if (!search.isSearchablesHasString(searchStr)) {
             search.addSearchableFront(new SearchResult(searchStr,
                     new IconicsDrawable(this)
                             .icon(GoogleMaterial.Icon.gmd_history)
                             .colorRes(R.color.md_grey_600)
                             .sizeDp(30)));
-            HabitApplication.getInstance().updateCurrentUserSearchHistory(new UserDao(realm), searchStr);
+            userDao.updateUserSearchHistory(user, searchStr);
         } else {
-            HabitApplication.getInstance().updateCurrentUserPresentSearchHistory(new UserDao(realm), searchStr);
+            userDao.updatePresentUserSearchHistory(user, searchStr);
         }
         searchStack.push(searchStr);
         updateSearch();
     }
 
     private void updateSearch() {
-        habits = new HabitDao(realm).getHabitsBySearchString(searchStack.peek());
-        habits.addChangeListener(new RealmChangeListener() {
+        RealmChangeListener changeListener = new RealmChangeListener() {
             @Override
             public void onChange() {
                 adapter.notifyDataSetChanged();
@@ -162,16 +170,22 @@ public class SearchActivity extends AppCompatActivity {
                 }
                 Toast.makeText(SearchActivity.this, "onChange triggered", Toast.LENGTH_SHORT).show();
             }
-        });
+        };
 
-        adapter = new HabitAdapter(this, habits);
+        habits = new HabitDao(realm).getHabitsBySearchString(searchStack.peek());
+        habits.addChangeListener(changeListener);
+
+        habitDetailses = new UserDao(realm).findAllAvailableHabitHetails(HabitApplication.getInstance().getUsername());
+        habitDetailses.addChangeListener(changeListener);
+
+        adapter = new HabitAdapter(this, new UserDao(realm), habits, habitDetailses);
         recyclerView.setAdapter(adapter);
 
         search.setLogoText(searchStack.peek());
         search.setSearchString(searchStack.peek());
 
         search.clearSearchable();
-        List<SearchHistory> historyList = HabitApplication.getInstance().getUser().getSearchHistories()
+        List<SearchHistory> historyList = user.getSearchHistories()
                 .where().findAllSorted("date", Sort.DESCENDING);
         for (SearchHistory history: historyList) {
             String historyStr = history.getWord();
@@ -196,8 +210,9 @@ public class SearchActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        realm.close();
         super.onDestroy();
+        realm.removeAllChangeListeners();
+        realm.close();
     }
 
     @Override

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:clickable="true"
+    android:foreground="?attr/selectableItemBackground">
+
+    <RelativeLayout
+        android:id="@+id/video_item_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:paddingBottom="3dp">
+
+        <ImageView
+            android:id="@+id/video_item_youtube_thumb"
+            android:layout_width="150dp"
+            android:layout_height="90dp"
+            android:layout_marginRight="14dp"
+            android:layout_alignParentLeft="true"
+            android:scaleType="fitXY"
+            android:layout_alignParentTop="true" />
+
+        <TextView
+            android:id="@+id/video_item_youtube_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="7dp"
+            android:layout_marginTop="2dp"
+            android:layout_alignRight="@+id/video_item_youtube_thumb"
+            android:layout_alignBottom="@+id/video_item_youtube_thumb"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textColor="@color/md_white_1000"
+            android:background="@drawable/youtube_duration_back"/>
+
+        <TextView
+            android:id="@+id/video_item_youtube_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="26dp"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textColor="@color/textColor"
+            android:layout_toRightOf="@+id/video_item_youtube_thumb" />
+
+        <TextView
+            android:id="@+id/video_item_youtube_channel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:ellipsize="end"
+            style="@style/TextAppearance.AppCompat.Small"
+            android:textColor="@color/createActionsSmallTextColor"
+            android:layout_toRightOf="@+id/video_item_youtube_thumb"
+            android:layout_below="@+id/video_item_youtube_title"/>
+
+        <TextView
+            android:id="@+id/video_item_youtube_views"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:ellipsize="end"
+            style="@style/TextAppearance.AppCompat.Small"
+            android:textColor="@color/createActionsSmallTextColor"
+            android:layout_marginBottom="5dp"
+            android:layout_toRightOf="@+id/video_item_youtube_thumb"
+            android:layout_below="@+id/video_item_youtube_channel"/>
+
+        <com.mikepenz.iconics.view.IconicsImageView
+            android:id="@+id/video_item_youtube_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            app:iiv_color="@color/icon_color_states"
+            app:iiv_size="28dp"
+            app:iiv_padding="5dp"/>
+
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>

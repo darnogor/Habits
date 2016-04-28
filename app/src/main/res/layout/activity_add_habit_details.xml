@@ -91,6 +91,35 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 style="@style/AddDetailsTheme.Normal.Font.Header"
+                android:text="@string/add_habit_details_additional_info" />
+
+            <com.blakit.petrenko.habits.view.FontTextView
+                android:id="@+id/add_habit_details_author"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/AddDetailsTheme.Small.Font"
+                android:text="@string/add_habit_details_additional_info_author"/>
+
+            <com.blakit.petrenko.habits.view.FontTextView
+                android:id="@+id/add_habit_details_add_count"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                style="@style/AddDetailsTheme.Small.Font"
+                android:text="@string/add_habit_details_additional_info_add_count"/>
+
+            <com.blakit.petrenko.habits.view.FontTextView
+                android:id="@+id/add_habit_details_complete_count"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="0dp"
+                style="@style/AddDetailsTheme.Small.Font"
+                android:text="@string/add_habit_details_additional_info_complete_count"/>
+
+            <com.blakit.petrenko.habits.view.FontTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/AddDetailsTheme.Normal.Font.Header"
                 android:text="@string/add_habit_details_description" />
 
             <com.blakit.petrenko.habits.view.FontTextView
@@ -137,6 +166,7 @@
 
 
             <RelativeLayout
+                android:id="@+id/add_habit_details_videos_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
@@ -170,6 +200,7 @@
             </RelativeLayout>
 
             <RelativeLayout
+                android:id="@+id/add_habit_details_articles_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 

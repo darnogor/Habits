@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="horizontal"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
+
+    <com.wnafee.vector.MorphButton
+        android:id="@+id/category_icon"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_margin="5dp"
+        app:vc_startDrawable="@drawable/circle"
+        app:vc_endDrawable="@drawable/circle"/>
+
+    <com.blakit.petrenko.habits.view.FontTextView
+        android:id="@+id/category_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="5dp"
+        android:layout_gravity="center_vertical"
+        font="OpenSans-Regular"
+        android:textSize="16sp"/>
+
+</LinearLayout>

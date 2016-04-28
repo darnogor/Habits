@@ -7,6 +7,11 @@ import java.util.UUID;
 import io.realm.CategoryRealmProxy;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Created by user_And on 02.12.2015.
@@ -17,39 +22,39 @@ import io.realm.annotations.PrimaryKey;
 public class Category extends RealmObject {
 
     @PrimaryKey
-    private String id;
-
     private String nameRes;
     private String color;
 
+
     public Category() {
-        this.id = UUID.randomUUID().toString();
     }
 
+
     public Category(String nameRes) {
-        this.id = UUID.randomUUID().toString();
         this.nameRes = nameRes;
     }
 
-    public String getId() {
-        return id;
+
+    public Category(String nameRes, String color) {
+        this.nameRes = nameRes;
+        this.color = color;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getNameRes() {
         return nameRes;
     }
 
+
     public void setNameRes(String nameRes) {
         this.nameRes = nameRes;
     }
 
+
     public String getColor() {
         return color;
     }
+
 
     public void setColor(String color) {
         this.color = color;

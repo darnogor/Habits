@@ -3,17 +3,19 @@ package com.blakit.petrenko.habits;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.blakit.petrenko.habits.adapter.HabitAdapter;
 import com.blakit.petrenko.habits.dao.HabitDao;
+import com.blakit.petrenko.habits.dao.UserDao;
 import com.blakit.petrenko.habits.model.Habit;
+import com.blakit.petrenko.habits.model.HabitDetails;
 import com.blakit.petrenko.habits.utils.Utils;
-import com.blakit.petrenko.habits.view.MarginDecoration;
+import com.blakit.petrenko.habits.view.decoration.MarginDecoration;
 
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
@@ -34,12 +36,16 @@ public class HabitListFragment extends Fragment {
     private HabitAdapter adapter;
 
     private RealmResults<Habit> habits;
+    private RealmResults<HabitDetails> habitDetailses;
+
+    private String categoryNameRes;
 
 
-    public static HabitListFragment newInstance(Realm realm, int order) {
+    public static HabitListFragment newInstance(Realm realm, int order, String categoryNameRes) {
         HabitListFragment fragment = new HabitListFragment();
 //        fragment.setRealm(realm);
         fragment.setOrder(order);
+        fragment.setCategoryNameRes(categoryNameRes);
 
         return fragment;
     }
@@ -52,29 +58,41 @@ public class HabitListFragment extends Fragment {
 
         if (savedInstanceState != null) {
             order = savedInstanceState.getInt("order");
+            categoryNameRes = savedInstanceState.getString("category");
         }
 
         HabitDao habitDao = new HabitDao(realm);
         switch (order) {
             case ORDER_POPULAR:
-                habits = habitDao.getPopularHabits();
+                habits = habitDao.getPopularHabits(categoryNameRes);
                 break;
             case ORDER_NEW:
-                habits = habitDao.getNewHabits();
+                habits = habitDao.getNewHabits(categoryNameRes);
                 break;
             case ORDER_ALL:
-                habits = habitDao.getHabitsSortedNames();
+                habits = habitDao.getHabitsSortedNames(categoryNameRes);
         }
 
         habits.addChangeListener(new RealmChangeListener() {
             @Override
             public void onChange() {
                 adapter.notifyDataSetChanged();
-                Toast.makeText(getActivity(), "onChange triggered", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getActivity(), "onChange triggered", Toast.LENGTH_SHORT).show();
             }
         });
 
-        adapter = new HabitAdapter(getActivity(), habits);
+        habitDetailses = new UserDao(realm).findAllAvailableHabitHetails(HabitApplication.getInstance().getUsername());
+        habitDetailses.addChangeListener(new RealmChangeListener() {
+            @Override
+            public void onChange() {
+                adapter.notifyDataSetChanged();
+//                if (getActivity() != null) {
+//                    Toast.makeText(getActivity(), "onChange HD triggered", Toast.LENGTH_SHORT).show();
+//                }
+            }
+        });
+
+        adapter = new HabitAdapter(getActivity(), new UserDao(realm), habits, habitDetailses);
 
         int spanCount = 1;
         if (Utils.isActivityLand(getActivity())) {
@@ -100,6 +118,7 @@ public class HabitListFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         outState.putInt("order", order);
+        outState.putString("category", categoryNameRes);
         super.onSaveInstanceState(outState);
     }
 
@@ -109,5 +128,10 @@ public class HabitListFragment extends Fragment {
 
     public void setOrder(int order) {
         this.order = order;
+    }
+
+
+    public void setCategoryNameRes(String categoryNameRes) {
+        this.categoryNameRes = categoryNameRes;
     }
 }

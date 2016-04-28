@@ -33,6 +33,7 @@ public class Habit extends RealmObject{
     private boolean isPublic;
     private String description;
     private Category category;
+    private String defaultAction;
     private RealmList<Action> actions;
     private RealmList<VideoItem> relatedVideoItems;
     private RealmList<Article> relatedArticles;
@@ -42,6 +43,9 @@ public class Habit extends RealmObject{
 
     private Date creationDate;
 
+    private boolean isDeleted;
+    private boolean isSyncronized;
+
     public Habit() {
         this.id = UUID.randomUUID().toString();
         this.relatedVideoItems = new RealmList<>();
@@ -49,11 +53,14 @@ public class Habit extends RealmObject{
         this.addCount = 0;
         this.completeCount = 0;
         this.creationDate = new Date();
+        this.isDeleted = false;
+        this.isSyncronized = false;
     }
 
     public Habit(@NonNull String name, String action) {
         this();
         this.name = name;
+        this.defaultAction = action;
         this.actions = new RealmList<>();
         for (int i = 0; i < 21; ++i) {
             Action a = new Action(action, i + 1);
@@ -71,102 +78,155 @@ public class Habit extends RealmObject{
         }
     }
 
+
     public String getId() {
         return id;
     }
+
 
     public void setId(String id) {
         this.id = id;
     }
 
+
     public String getName() {
         return name;
     }
+
 
     public void setName(String name) {
         this.name = name;
     }
 
+
     public String getAuthor() {
         return author;
     }
+
 
     public void setAuthor(String author) {
         this.author = author;
     }
 
+
     public boolean isPublic() {
         return isPublic;
     }
 
-    public void setIsPublic(boolean isPublic) {
+
+    public void setPublic(boolean isPublic) {
         this.isPublic = isPublic;
     }
+
 
     public String getDescription() {
         return description;
     }
 
+
     public void setDescription(String description) {
         this.description = description;
     }
+
 
     public Category getCategory() {
         return category;
     }
 
+
     public void setCategory(Category category) {
         this.category = category;
     }
 
+
     public RealmList<Action> getActions() {
         return actions;
     }
+
+
+    public RealmList<VideoItem> getRelatedVideoItems() {
+        return relatedVideoItems;
+    }
+
+
+    public RealmList<Article> getRelatedArticles() {
+        return relatedArticles;
+    }
+
+
+    public int getAddCount() {
+        return addCount;
+    }
+
+
+    public void setAddCount(int addCount) {
+        this.addCount = addCount;
+    }
+
+
+    public String getDefaultAction() {
+        return defaultAction;
+    }
+
+
+    public void setDefaultAction(String defaultAction) {
+        this.defaultAction = defaultAction;
+    }
+
+
+    public int getCompleteCount() {
+        return completeCount;
+    }
+
+
+    public void setCompleteCount(int completeCount) {
+        this.completeCount = completeCount;
+    }
+
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
+
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+
+    public void setDeleted(boolean isDeleted) {
+        this.isDeleted = isDeleted;
+    }
+
+
+    public boolean isSyncronized() {
+        return isSyncronized;
+    }
+
+
+    public void setSyncronized(boolean isSyncronized) {
+        this.isSyncronized = isSyncronized;
+    }
+
 
     @ParcelPropertyConverter(ActionListParcelConverter.class)
     public void setActions(RealmList<Action> actions) {
         this.actions = actions;
     }
 
-    public RealmList<VideoItem> getRelatedVideoItems() {
-        return relatedVideoItems;
-    }
 
     @ParcelPropertyConverter(VideoItemParcelConverter.class)
     public void setRelatedVideoItems(RealmList<VideoItem> relatedVideoItems) {
         this.relatedVideoItems = relatedVideoItems;
     }
 
-    public RealmList<Article> getRelatedArticles() {
-        return relatedArticles;
-    }
-
     @ParcelPropertyConverter(ArticleListParcelConverter.class)
     public void setRelatedArticles(RealmList<Article> relatedArticles) {
         this.relatedArticles = relatedArticles;
-    }
-
-    public int getAddCount() {
-        return addCount;
-    }
-
-    public void setAddCount(int addCount) {
-        this.addCount = addCount;
-    }
-
-    public int getCompleteCount() {
-        return completeCount;
-    }
-
-    public void setCompleteCount(int completeCount) {
-        this.completeCount = completeCount;
-    }
-
-    public Date getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(Date creationDate) {
-        this.creationDate = creationDate;
     }
 }

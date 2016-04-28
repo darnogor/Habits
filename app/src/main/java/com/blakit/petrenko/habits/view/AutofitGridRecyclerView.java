@@ -9,6 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.GridLayoutAnimationController;
 
+import com.blakit.petrenko.habits.utils.Utils;
+
 /**
  * Created by user_And on 17.07.2015.
  */
@@ -44,6 +46,17 @@ public class AutofitGridRecyclerView extends RecyclerView {
         manager = new GridLayoutManager(getContext(), 1);
         setLayoutManager(manager);
     }
+
+
+    public void setColumnWidth(int columnWidth) {
+        this.columnWidth = columnWidth;
+    }
+
+
+    public void setColumnWidthDp(int columnWidthDp) {
+        this.columnWidth = Utils.dpToPx(getContext(), columnWidthDp);
+    }
+
 
     @Override
     protected void onMeasure(int widthSpec, int heightSpec) {

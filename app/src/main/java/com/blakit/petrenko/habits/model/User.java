@@ -7,7 +7,7 @@ import io.realm.annotations.PrimaryKey;
 /**
  * Created by user_And on 16.07.2015.
  */
-public class User extends RealmObject{
+public class User extends RealmObject {
 
     @PrimaryKey
     private String name;
@@ -18,10 +18,13 @@ public class User extends RealmObject{
     private RealmList<HabitDetails> myHabits;
     private RealmList<SearchHistory> searchHistories;
 
+    private boolean isSyncronized;
+
     //TODO: Add global settings for user
 
 
     public User() {}
+
 
     public User(String name) {
         this.name = name;
@@ -32,55 +35,78 @@ public class User extends RealmObject{
         return name;
     }
 
+
     public void setName(String name) {
         this.name = name;
     }
+
 
     public String getDisplayName() {
         return displayName;
     }
 
+
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
+
 
     public String getNickName() {
         return nickName;
     }
 
+
     public void setNickName(String nickName) {
         this.nickName = nickName;
     }
+
 
     public String getImgURL() {
         return imgURL;
     }
 
+
     public void setImgURL(String imgURL) {
         this.imgURL = imgURL;
     }
+
 
     public String getCoverImgURL() {
         return coverImgURL;
     }
 
+
     public void setCoverImgURL(String coverImgURL) {
         this.coverImgURL = coverImgURL;
     }
+
 
     public RealmList<HabitDetails> getMyHabits() {
         return myHabits;
     }
 
+
     public void setMyHabits(RealmList<HabitDetails> myHabits) {
         this.myHabits = myHabits;
     }
+
 
     public RealmList<SearchHistory> getSearchHistories() {
         return searchHistories;
     }
 
+
     public void setSearchHistories(RealmList<SearchHistory> searchHistories) {
         this.searchHistories = searchHistories;
+    }
+
+
+    public boolean isSyncronized() {
+        return isSyncronized;
+    }
+
+
+    public void setSyncronized(boolean isSyncronized) {
+        this.isSyncronized = isSyncronized;
     }
 }

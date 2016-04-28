@@ -9,25 +9,24 @@ import android.accounts.OperationCanceledException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.view.animation.LayoutAnimationController;
-import android.widget.Button;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.blakit.petrenko.habits.adapter.HabitDetailsAdapter;
 import com.blakit.petrenko.habits.dao.HabitDao;
 import com.blakit.petrenko.habits.dao.UserDao;
 import com.blakit.petrenko.habits.model.Action;
+import com.blakit.petrenko.habits.model.Category;
 import com.blakit.petrenko.habits.model.Habit;
 import com.blakit.petrenko.habits.model.HabitDetails;
 import com.blakit.petrenko.habits.model.SearchHistory;
@@ -36,7 +35,8 @@ import com.blakit.petrenko.habits.model.VideoItem;
 import com.blakit.petrenko.habits.utils.Resources;
 import com.blakit.petrenko.habits.utils.Utils;
 import com.blakit.petrenko.habits.view.AutofitGridRecyclerView;
-import com.blakit.petrenko.habits.view.MarginDecoration;
+import com.blakit.petrenko.habits.view.CustomSelectedDrawerItem;
+import com.blakit.petrenko.habits.view.decoration.MarginDecoration;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.UserRecoverableAuthException;
@@ -45,6 +45,7 @@ import com.google.api.client.util.Charsets;
 import com.google.api.services.youtube.YouTubeScopes;
 import com.google.common.io.CharStreams;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
@@ -63,38 +64,38 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
 import io.realm.Realm;
+import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
-import io.realm.Sort;
 
 
 public class MainActivity extends AppCompatActivity  {
 
-    private final int NAV_MENU_ITEM_ADDHABITS = 1;
-    private final int NAV_MENU_ITEM_MYHABITS  = 2;
-    private final int NAV_MENU_ITEM_COMPLETE  = 3;
-    private final int NAV_MENU_ITEM_CREATE    = 4;
-    private final int NAV_MENU_ITEM_PROFILE   = 5;
-    private final int NAV_MENU_ITEM_SETTINGS  = 6;
-    private final int NAV_MENU_ITEM_HELP      = 7;
-    private final int NAV_MENU_ITEM_INFO      = 8;
+    private final int NAV_MENU_ITEM_ADDHABITS       = 1;
+    private final int NAV_MENU_ITEM_MYHABITS        = 2;
+    private final int NAV_MENU_ITEM_COMPLETE_HABITS = 3;
+    private final int NAV_MENU_ITEM_CREATED_HABITS  = 4;
+    private final int NAV_MENU_ITEM_CREATE          = 5;
+    private final int NAV_MENU_ITEM_PROFILE         = 6;
+    private final int NAV_MENU_ITEM_SETTINGS        = 7;
+    private final int NAV_MENU_ITEM_HELP            = 8;
+    private final int NAV_MENU_ITEM_INFO            = 9;
 
     private static final int REQ_SIGN_IN_REQUIRED = 42;
     private static final int CHOOSE_ACCOUNT = 4242;
 
     private Realm realm;
 
+    private String selectedAccountName;
+    private User user;
+    private RealmResults<HabitDetails> habitsDetails;
+
     private Drawer navDrawer;
     private AccountHeader accountHeader;
-    private List<HabitDetails> habitsDetails;
 
+    private HabitDetailsAdapter adapter;
     private AutofitGridRecyclerView recyclerView;
-
-    private String selectedAccountName;
 
     private long exitTimeBackPressedMillis = System.currentTimeMillis()-4000;
     private String mToken;
@@ -107,10 +108,29 @@ public class MainActivity extends AppCompatActivity  {
         setContentView(R.layout.activity_main);
 
         realm = Realm.getDefaultInstance();
+
+//        realm.executeTransaction(new Realm.Transaction() {
+//            @Override
+//            public void execute(Realm realm) {
+//                Log.d("КАСТЫЛЪ", "Fix realm query problem after application remove from activity stack");
+//            }
+//        });
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                Log.d("КАСТЫЛЪ", "Fix realm query problem after application remove from activity stack");
+                Category eating      = new Category("category_healthy_eating", "#00E676");
+                Category sport       = new Category("category_sport", "#80deea");
+                Category badHabits   = new Category("category_bad_habits", "#ff8a80");
+                Category hobby       = new Category("category_hobby", "#ffcc80");
+                Category training    = new Category("category_training", "#ba68c8");
+                Category lifeImprove = new Category("category_life_improve", "#7986cb");
+
+                realm.copyToRealmOrUpdate(eating);
+                realm.copyToRealmOrUpdate(sport);
+                realm.copyToRealmOrUpdate(badHabits);
+                realm.copyToRealmOrUpdate(hobby);
+                realm.copyToRealmOrUpdate(training);
+                realm.copyToRealmOrUpdate(lifeImprove);
             }
         });
 
@@ -122,173 +142,12 @@ public class MainActivity extends AppCompatActivity  {
         }
 
         initNavigationDrawer(toolbar, savedInstanceState);
-
-
-        recyclerView = (AutofitGridRecyclerView) findViewById(R.id.recycler_view);
-        recyclerView.addItemDecoration(new MarginDecoration(this));
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setAdapter(new HabitDetailsAdapter(this, new ArrayList<HabitDetails>()));
-        
-        UserDao userDao = new UserDao(realm);
-
-        SharedPreferences main = getSharedPreferences("HabitAppPreferences", MODE_PRIVATE);
-        String defaultAccount = main.getString("default_account", "");
-        if (!TextUtils.isEmpty(defaultAccount) && 
-                userDao.getUserByName(defaultAccount) != null &&
-                Utils.isAccountManagerHasAccount(this, defaultAccount)) {
-            HabitApplication.getInstance().setCurrentUser(userDao, defaultAccount);
-            selectedAccountName = defaultAccount;
-            addProfileIfNeed(selectedAccountName);
-
-            new RetrieveTokenTask().execute(selectedAccountName);
-            updateData();
-            updateRecyclerView();
-            
-        } else {
-            startChooseAccountActivity();
-        }
-
-        //NOTE: Generating test habits
-
-        final int count = 100;
-
-        final Button loadTest = (Button) findViewById(R.id.test_button);
-        final Button deleteTest = (Button) findViewById(R.id.test_button_delete);
-        final ProgressBar testBar = (ProgressBar) findViewById(R.id.test_progress);
-        testBar.setVisibility(View.GONE);
-        testBar.setProgress(0);
-        testBar.setMax(count);
-
-
-        final Random random = new Random(count);
-
-        loadTest.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadTest.setEnabled(false);
-                deleteTest.setEnabled(false);
-                testBar.setVisibility(View.VISIBLE);
-                realm.executeTransaction(new Realm.Transaction() {
-                    @Override
-                    public void execute(Realm realm) {
-                        for (int i = 0; i < count; ++i) {
-                            final Habit h = new Habit(Utils.randomString(15), "Action");
-                            h.setAuthor("Author " + random.nextInt());
-                            h.setAddCount(random.nextInt(100000));
-                            h.setCompleteCount(random.nextInt(100000));
-                            realm.copyToRealmOrUpdate(h);
-                            testBar.setProgress(i+1);
-                        }
-                    }
-                }, new Realm.Transaction.Callback() {
-                    @Override
-                    public void onSuccess() {
-                        loadTest.setEnabled(true);
-                        deleteTest.setEnabled(true);
-                        testBar.setVisibility(View.GONE);
-                    }
-                });
-            }
-        });
-
-        deleteTest.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadTest.setEnabled(false);
-                deleteTest.setEnabled(false);
-                testBar.setVisibility(View.VISIBLE);
-                realm.executeTransaction(new Realm.Transaction() {
-                    @Override
-                    public void execute(Realm realm) {
-                        RealmResults<Habit> results = realm.where(Habit.class).findAllSorted("creationDate", Sort.DESCENDING);
-                        testBar.setMax(Math.min(count, results.size()));
-                        for (int i = 0; i < Math.min(count, results.size()); ++i) {
-                            results.remove(0);
-                            testBar.setProgress(i+1);
-                        }
-                    }
-                }, new Realm.Transaction.Callback() {
-                    @Override
-                    public void onSuccess() {
-                        loadTest.setEnabled(true);
-                        deleteTest.setEnabled(true);
-                        testBar.setVisibility(View.GONE);
-                    }
-                });
-            }
-        });
-
+        initHabitsDetails();
+        initAccount();
+        initFab();
+//        generateTest();
     }
 
-    private void updateData() {
-
-    }
-
-    private void startChooseAccountActivity() {
-        Intent intent = AccountPicker.newChooseAccountIntent(null, null,
-                new String[]{"com.google"},
-                true, null, null, null, null);
-        startActivityForResult(intent, CHOOSE_ACCOUNT);
-    }
-
-    private void updateSelectionAccountHeader() {
-        User user = HabitApplication.getInstance().getUser();
-
-        for (IProfile profile: accountHeader.getProfiles()) {
-            if (profile.getEmail() != null &&
-                    profile.getEmail().getText().equals(selectedAccountName)) {
-                accountHeader.setActiveProfile(profile);
-                accountHeader.getActiveProfile()
-                        .withName(user.getDisplayName());
-                if (user.getImgURL() != null) {
-                    accountHeader.getActiveProfile()
-                            .withIcon(ImageLoader.getInstance().loadImageSync(user.getImgURL()));
-                }
-                if (user.getCoverImgURL() != null) {
-                    accountHeader.setBackground(new BitmapDrawable(getResources(),
-                            ImageLoader.getInstance().loadImageSync(user.getCoverImgURL())));
-                }
-                break;
-            }
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        navDrawer.setSelection(NAV_MENU_ITEM_MYHABITS);
-        updateRecyclerView();
-
-//        recyclerView.setAdapter(new HabitDetailsAdapter(this, habitsDetails));
-    }
-
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        realm.close();
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (navDrawer != null && navDrawer.isDrawerOpen()) {
-            navDrawer.closeDrawer();
-        } else {
-            if (System.currentTimeMillis() - exitTimeBackPressedMillis < 3000) {
-                super.onBackPressed();
-            } else {
-                Toast.makeText(this,R.string.main_activity_exit_toast,Toast.LENGTH_SHORT).show();
-                exitTimeBackPressedMillis = System.currentTimeMillis();
-            }
-        }
-    }
-
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState = navDrawer.saveInstanceState(outState);
-        super.onSaveInstanceState(outState);
-    }
 
     private void initNavigationDrawer(Toolbar toolbar, Bundle savedInstanceState) {
         accountHeader = createAccountHeader(savedInstanceState);
@@ -310,16 +169,36 @@ public class MainActivity extends AppCompatActivity  {
                                 new Handler().postDelayed(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Intent addIntent = new Intent(MainActivity.this, AddHabitActivity.class);
-                                        startActivity(addIntent);
+                                        Intent intent = new Intent(MainActivity.this, AddHabitActivity.class);
+                                        startActivity(intent);
                                         overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left_half);
                                     }
                                 }, 350);
                                 return false;
                             case NAV_MENU_ITEM_MYHABITS:
                                 return false;
-                            case NAV_MENU_ITEM_COMPLETE:
-                                break;
+                            case NAV_MENU_ITEM_COMPLETE_HABITS:
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Intent intent = new Intent(MainActivity.this, HabitListActivity.class);
+                                        intent.putExtra("habits_type", HabitListActivity.HABITS_COMPLETED);
+                                        startActivity(intent);
+                                        overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left_half);
+                                    }
+                                }, 350);
+                                return false;
+                            case NAV_MENU_ITEM_CREATED_HABITS:
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Intent intent = new Intent(MainActivity.this, HabitListActivity.class);
+                                        intent.putExtra("habits_type", HabitListActivity.HABITS_CREATED);
+                                        startActivity(intent);
+                                        overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left_half);
+                                    }
+                                }, 350);
+                                return false;
                             case NAV_MENU_ITEM_CREATE:
                                 new Handler().postDelayed(new Runnable() {
                                     @Override
@@ -333,22 +212,25 @@ public class MainActivity extends AppCompatActivity  {
                                 }, 350);
                                 return false;
                             case NAV_MENU_ITEM_PROFILE:
-                                for(HabitDetails hd: HabitApplication.getInstance().getUser().getMyHabits()) {
-                                    Log.d("!!!!HabitDetails: ", hd.getHabit().getName());
-                                }
-                                break;
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                                        intent.putExtra("mToken", mToken);
+                                        intent.putExtra("accName", selectedAccountName);
+                                        startActivity(intent);
+                                        overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left_half);
+                                    }
+                                }, 350);
+                                return false;
                             case NAV_MENU_ITEM_SETTINGS:
                                 break;
                             case NAV_MENU_ITEM_HELP:
-                                realm.beginTransaction();
-                                HabitApplication.getInstance().getUser().getMyHabits().clear();
-                                realm.clear(HabitDetails.class);
-                                realm.commitTransaction();
                                 break;
                             case NAV_MENU_ITEM_INFO:
                                 UserDao userDao = new UserDao(realm);
                                 User userByName = userDao.getUserByName(HabitApplication
-                                        .getInstance().getUser().getName());
+                                        .getInstance().getUsername());
                                 Log.d("!!!!User", userByName.getDisplayName());
                                 for (SearchHistory h: userByName.getSearchHistories()) {
                                     Log.d("!!!!History", h.getWord()+ " "+h.getDate().toString());
@@ -376,38 +258,42 @@ public class MainActivity extends AppCompatActivity  {
     private IDrawerItem[] initDrawerItems() {
         return new IDrawerItem[] {
                 new CustomSelectedDrawerItem()
-                    .withName(R.string.nav_menu_item_addhabit)
-                    .withIcon(GoogleMaterial.Icon.gmd_add_box)
-                    .withIdentifier(NAV_MENU_ITEM_ADDHABITS),
+                        .withName(R.string.nav_menu_item_addhabit)
+                        .withIcon(GoogleMaterial.Icon.gmd_add_box)
+                        .withIdentifier(NAV_MENU_ITEM_ADDHABITS),
                 new CustomSelectedDrawerItem()
-                    .withName(R.string.nav_menu_item_myhabits)
-                    .withIcon(GoogleMaterial.Icon.gmd_view_module)
-                    .withIdentifier(NAV_MENU_ITEM_MYHABITS),
+                        .withName(R.string.nav_menu_item_myhabits)
+                        .withIcon(GoogleMaterial.Icon.gmd_view_module)
+                        .withIdentifier(NAV_MENU_ITEM_MYHABITS),
                 new CustomSelectedDrawerItem()
-                    .withName(R.string.nav_menu_item_complete)
-                    .withIcon(GoogleMaterial.Icon.gmd_check_box)
-                    .withIdentifier(NAV_MENU_ITEM_COMPLETE),
+                        .withName(R.string.nav_menu_item_complete)
+                        .withIcon(GoogleMaterial.Icon.gmd_check_box)
+                        .withIdentifier(NAV_MENU_ITEM_COMPLETE_HABITS),
                 new CustomSelectedDrawerItem()
-                    .withName(R.string.nav_menu_item_create)
-                    .withIcon(GoogleMaterial.Icon.gmd_create)
-                    .withIdentifier(NAV_MENU_ITEM_CREATE),
+                        .withName(R.string.nav_menu_item_created_habits)
+                        .withIcon(GoogleMaterial.Icon.gmd_folder)
+                        .withIdentifier(NAV_MENU_ITEM_CREATED_HABITS),
                 new CustomSelectedDrawerItem()
-                    .withName(R.string.nav_menu_item_profile)
-                    .withIcon(GoogleMaterial.Icon.gmd_account_box)
-                    .withIdentifier(NAV_MENU_ITEM_PROFILE),
+                        .withName(R.string.nav_menu_item_create)
+                        .withIcon(GoogleMaterial.Icon.gmd_create)
+                        .withIdentifier(NAV_MENU_ITEM_CREATE),
                 new DividerDrawerItem(),
                 new CustomSelectedDrawerItem()
-                    .withName(R.string.nav_menu_item_settings)
-                    .withIcon(GoogleMaterial.Icon.gmd_settings)
-                    .withIdentifier(NAV_MENU_ITEM_SETTINGS),
+                .withName(R.string.nav_menu_item_profile)
+                        .withIcon(GoogleMaterial.Icon.gmd_account_box)
+                        .withIdentifier(NAV_MENU_ITEM_PROFILE),
                 new CustomSelectedDrawerItem()
-                    .withName(R.string.nav_menu_item_help)
-                    .withIcon(GoogleMaterial.Icon.gmd_help)
-                    .withIdentifier(NAV_MENU_ITEM_HELP),
+                        .withName(R.string.nav_menu_item_settings)
+                        .withIcon(GoogleMaterial.Icon.gmd_settings)
+                        .withIdentifier(NAV_MENU_ITEM_SETTINGS),
                 new CustomSelectedDrawerItem()
-                    .withName(R.string.nav_menu_item_info)
-                    .withIcon(GoogleMaterial.Icon.gmd_info)
-                    .withIdentifier(NAV_MENU_ITEM_INFO)
+                        .withName(R.string.nav_menu_item_help)
+                        .withIcon(GoogleMaterial.Icon.gmd_help)
+                        .withIdentifier(NAV_MENU_ITEM_HELP),
+                new CustomSelectedDrawerItem()
+                        .withName(R.string.nav_menu_item_info)
+                        .withIcon(GoogleMaterial.Icon.gmd_info)
+                        .withIdentifier(NAV_MENU_ITEM_INFO)
         };
     }
 
@@ -436,32 +322,32 @@ public class MainActivity extends AppCompatActivity  {
             }
         }
         profiles[accounts.length] = new ProfileSettingDrawerItem()
-                    .withName(getResources().getString(R.string.nav_manu_item_add_account))
-                    .withIcon(GoogleMaterial.Icon.gmd_add)
-                    .withIdentifier(99)
-                    .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-                        @Override
-                        public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                            accountManager.addAccount("com.google", null, null, null, MainActivity.this,
-                                    new AccountManagerCallback<Bundle>() {
-                                        @Override
-                                        public void run(AccountManagerFuture<Bundle> future) {
-                                            try {
-                                                Bundle result = future.getResult();
-                                                String accountName = result.getString(AccountManager.KEY_ACCOUNT_NAME);
-                                                addProfileIfNeed(accountName);
-                                            } catch (OperationCanceledException e) {
-                                                e.printStackTrace();
-                                            } catch (IOException e) {
-                                                e.printStackTrace();
-                                            } catch (AuthenticatorException e) {
-                                                e.printStackTrace();
-                                            }
+                .withName(getResources().getString(R.string.nav_manu_item_add_account))
+                .withIcon(GoogleMaterial.Icon.gmd_add)
+                .withIdentifier(99)
+                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                    @Override
+                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                        accountManager.addAccount("com.google", null, null, null, MainActivity.this,
+                                new AccountManagerCallback<Bundle>() {
+                                    @Override
+                                    public void run(AccountManagerFuture<Bundle> future) {
+                                        try {
+                                            Bundle result = future.getResult();
+                                            String accountName = result.getString(AccountManager.KEY_ACCOUNT_NAME);
+                                            addProfileIfNeed(accountName);
+                                        } catch (OperationCanceledException e) {
+                                            e.printStackTrace();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        } catch (AuthenticatorException e) {
+                                            e.printStackTrace();
                                         }
-                                    }, null);
-                            return false;
-                        }
-                    });
+                                    }
+                                }, null);
+                        return false;
+                    }
+                });
 
         return new AccountHeaderBuilder()
                 .withActivity(this)
@@ -471,10 +357,12 @@ public class MainActivity extends AppCompatActivity  {
 
                     @Override
                     public boolean onProfileChanged(View view, IProfile iProfile, boolean b) {
-                        if (iProfile.getEmail() == null)
+                        if (iProfile.getEmail() == null) {
                             return true;
+                        }
                         String accountName = iProfile.getEmail().getText();
-                        selectedAccountName = accountName;
+                        setSelectedAccountName(accountName);
+
                         new RetrieveTokenTask().execute(accountName);
                         return false;
                     }
@@ -487,85 +375,196 @@ public class MainActivity extends AppCompatActivity  {
     }
 
 
-//    public void startActivityWithExplodeAnimation(int position, final float x, final float y,
-//                      final Intent intent, long duration) {
+    private void initHabitsDetails() {
+        recyclerView = (AutofitGridRecyclerView) findViewById(R.id.recycler_view);
+        recyclerView.addItemDecoration(new MarginDecoration(this));
+        recyclerView.setHasFixedSize(true);
+    }
+
+
+    private void initAccount() {
+        UserDao userDao        = new UserDao(realm);
+        SharedPreferences main = getSharedPreferences("HabitAppPreferences", MODE_PRIVATE);
+        String defaultAccount  = main.getString("default_account", "");
+
+        if (!TextUtils.isEmpty(defaultAccount) &&
+                userDao.getUserByName(defaultAccount) != null &&
+                Utils.isAccountManagerHasAccount(this, defaultAccount)) {
+
+            setSelectedAccountName(defaultAccount);
+            addProfileIfNeed(selectedAccountName);
+
+            new RetrieveTokenTask().execute(selectedAccountName);
+        } else {
+            startChooseAccountActivity();
+        }
+    }
+
+
+    private void initFab() {
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.main_activity_fab);
+
+        fab.setImageDrawable(new IconicsDrawable(this)
+                .icon(GoogleMaterial.Icon.gmd_add)
+                .color(Color.WHITE)
+                .sizeDp(16));
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent addIntent = new Intent(MainActivity.this, AddHabitActivity.class);
+                startActivity(addIntent);
+                overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left_half);
+            }
+        });
+    }
+
+
+//    private void generateTest() {
+//        //NOTE: Generating test habits
 //
-//        Transition explode = new Explode();
-//        explode.setEpicenterCallback(new Transition.EpicenterCallback() {
+//        final int count = 100;
+//
+//        final Button loadTest = (Button) findViewById(R.id.test_button);
+//        final Button deleteTest = (Button) findViewById(R.id.test_button_delete);
+//        final ProgressBar testBar = (ProgressBar) findViewById(R.id.test_progress);
+//        testBar.setVisibility(View.GONE);
+//        testBar.setProgress(0);
+//        testBar.setMax(count);
+//
+//
+//        final Random random = new Random(count);
+//
+//        loadTest.setOnClickListener(new View.OnClickListener() {
 //            @Override
-//            public Rect onGetEpicenter(Transition transition) {
-//                return new Rect((int) x - 1, (int) y - 1, (int) x + 1, (int) y + 1);
+//            public void onClick(View v) {
+//                loadTest.setEnabled(false);
+//                deleteTest.setEnabled(false);
+//                testBar.setVisibility(View.VISIBLE);
+//
+//                realm.executeTransactionAsync(new Realm.Transaction() {
+//                    @Override
+//                    public void execute(Realm realm) {
+//                        List<Category> categories = realm.where(Category.class).findAll();
+//                        Random randCategory = new Random();
+//
+//                        for (int i = 0; i < count; ++i) {
+//                            final Habit h = new Habit(Utils.randomString(25), "Action");
+//
+//                            h.setDescription("Very very big description");
+//                            h.setAuthor("Author " + random.nextInt());
+//                            h.setAddCount(random.nextInt(100000));
+//                            h.setCompleteCount(random.nextInt(100000));
+//                            h.setCategory(categories.get(randCategory.nextInt(categories.size())));
+//
+//                            realm.copyToRealmOrUpdate(h);
+//
+//                            testBar.setProgress(i+1);
+//                        }
+//                    }
+//                }, new Realm.Transaction.OnSuccess() {
+//                    @Override
+//                    public void onSuccess() {
+//                        loadTest.setEnabled(true);
+//                        deleteTest.setEnabled(true);
+//                        testBar.setVisibility(View.GONE);
+//                    }
+//                });
 //            }
 //        });
-//        explode.setPropagation(new CircularPropagation());
-//        explode.setDuration(duration);
-//        explode.setInterpolator(new AccelerateInterpolator());
 //
-//        TransitionManager.beginDelayedTransition(recyclerView, explode);
-//
-////        List<Habit> elem = habits.subList(position, position + 1);
-////        recyclerView.setAdapter(new HabitDetailsAdapter(this, null));
-//
-////        HabitDetailsAdapter adapter = (HabitDetailsAdapter) recyclerView.getAdapter();
-////        adapter.removeItemsBesidesPosition(position);
-//
-//        for (int i = habitsDetails.size()-1; i >= 0; --i) {
-//            if (i != position)
-//                recyclerView.removeViewAt(i);
-//        }
-//
-//
-//
-//        new Handler().postDelayed(new Runnable() {
+//        deleteTest.setOnClickListener(new View.OnClickListener() {
 //            @Override
-//            public void run() {
-//                startActivity(intent);
-//                overridePendingTransition(0, 0);
+//            public void onClick(View v) {
+//                loadTest.setEnabled(false);
+//                deleteTest.setEnabled(false);
+//                testBar.setVisibility(View.VISIBLE);
+//                realm.executeTransactionAsync(new Realm.Transaction() {
+//                    @Override
+//                    public void execute(Realm realm) {
+//                        RealmResults<Habit> results = realm.where(Habit.class).findAllSorted("creationDate", Sort.DESCENDING);
+//                        testBar.setMax(Math.min(count, results.size()));
+//                        for (int i = 0; i < Math.min(count, results.size()); ++i) {
+//                            results.remove(0);
+//                            testBar.setProgress(i+1);
+//                        }
+//                    }
+//                }, new Realm.Transaction.OnSuccess() {
+//                    @Override
+//                    public void onSuccess() {
+//                        loadTest.setEnabled(true);
+//                        deleteTest.setEnabled(true);
+//                        testBar.setVisibility(View.GONE);
+//                    }
+//                });
 //            }
-//        }, duration);
+//        });
 //    }
 
 
-    public void startActivityWithScaleAnimation(final Intent intent, long duration) {
-
-        LayoutAnimationController animationController =
-                AnimationUtils.loadLayoutAnimation(this, R.anim.grid_layout_animation_reverse);
-        recyclerView.setLayoutAnimation(animationController);
-        recyclerView.setLayoutAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                recyclerView.setAdapter(new HabitDetailsAdapter(MainActivity.this, null));
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
-        recyclerView.removeAllViews();
-        recyclerView.startLayoutAnimation();
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                startActivity(intent);
-                overridePendingTransition(0, 0);
-            }
-        }, duration);
+    private void startChooseAccountActivity() {
+        Intent intent = AccountPicker.newChooseAccountIntent(null, null,
+                new String[]{"com.google"},
+                true, null, null, null, null);
+        startActivityForResult(intent, CHOOSE_ACCOUNT);
     }
 
-    public void updateRecyclerView() {
-        User user = HabitApplication.getInstance().getUser();
-        if (user != null) {
-            habitsDetails = user.getMyHabits();
+    private void updateSelectionAccountHeader() {
+        for (IProfile profile: accountHeader.getProfiles()) {
+            if (profile.getEmail() != null && profile.getEmail().getText().equals(selectedAccountName)) {
+                accountHeader.setActiveProfile(profile);
+                accountHeader.getActiveProfile().withName(user.getDisplayName());
+
+                if (user.getImgURL() != null) {
+                    accountHeader.getActiveProfile()
+                            .withIcon(ImageLoader.getInstance().loadImageSync(user.getImgURL()));
+                }
+                if (user.getCoverImgURL() != null) {
+                    accountHeader.setBackground(new BitmapDrawable(getResources(),
+                            ImageLoader.getInstance().loadImageSync(user.getCoverImgURL())));
+                }
+                break;
+            }
         }
-        recyclerView.setAdapter(new HabitDetailsAdapter(this, habitsDetails));
     }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        navDrawer.setSelection(NAV_MENU_ITEM_MYHABITS);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (habitsDetails != null) {
+            habitsDetails.removeChangeListeners();
+        }
+        realm.close();
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        if (navDrawer != null && navDrawer.isDrawerOpen()) {
+            navDrawer.closeDrawer();
+        } else {
+            if (System.currentTimeMillis() - exitTimeBackPressedMillis < 3000) {
+                super.onBackPressed();
+            } else {
+                Toast.makeText(this,R.string.main_activity_exit_toast,Toast.LENGTH_SHORT).show();
+                exitTimeBackPressedMillis = System.currentTimeMillis();
+            }
+        }
+    }
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState = navDrawer.saveInstanceState(outState);
+        super.onSaveInstanceState(outState);
+    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -578,8 +577,9 @@ public class MainActivity extends AppCompatActivity  {
                 break;
             case CHOOSE_ACCOUNT:
                 if (resultCode == RESULT_OK) {
-                    selectedAccountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+                    setSelectedAccountName(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME));
                     addProfileIfNeed(selectedAccountName);
+
                     new RetrieveTokenTask().execute(selectedAccountName);
                 } else {
                     startChooseAccountActivity();
@@ -587,6 +587,46 @@ public class MainActivity extends AppCompatActivity  {
                 break;
         }
     }
+
+
+    public void setSelectedAccountName(String selectedAccountName) {
+        if (TextUtils.isEmpty(this.selectedAccountName) ||
+                !this.selectedAccountName.equals(selectedAccountName)) {
+            this.selectedAccountName = selectedAccountName;
+
+            HabitApplication.getInstance().setUsername(selectedAccountName);
+            getSharedPreferences("HabitAppPreferences", MODE_PRIVATE)
+                    .edit()
+                    .putString("default_account", selectedAccountName)
+                    .commit();
+
+            UserDao userDao = new UserDao(realm);
+
+            user = userDao.getUserByName(selectedAccountName);
+
+            if (user == null) {
+                user = userDao.createOrUpdate(new User(selectedAccountName));
+            }
+
+            if (habitsDetails != null) {
+                habitsDetails.removeChangeListeners();
+            }
+            habitsDetails = new UserDao(realm).findAllAvailableHabitHetails(selectedAccountName);
+            habitsDetails.addChangeListener(new RealmChangeListener() {
+                @Override
+                public void onChange() {
+                    adapter.notifyDataSetChanged();
+                    Log.d("!!!!Change listener", "Notify data set change adapter");
+                }
+            });
+
+            adapter = new HabitDetailsAdapter(this, habitsDetails);
+            adapter.setHasStableIds(true);
+
+            recyclerView.setAdapter(adapter);
+        }
+    }
+
 
     private void addProfileIfNeed(String selectedAccountName) {
         Log.d("Selected account name:", selectedAccountName);
@@ -604,36 +644,42 @@ public class MainActivity extends AppCompatActivity  {
             int length = accountHeader.getProfiles().size();
             accountHeader.addProfile(new ProfileDrawerItem()
                             .withEmail(selectedAccountName)
-                            .withIdentifier(100+length),
-                    length-1);
-            this.selectedAccountName = selectedAccountName;
+                            .withIdentifier(100 + length),
+                    length - 1);
+            setSelectedAccountName(selectedAccountName);
             accountHeader.setActiveProfile(100+length);
         }
     }
+
 
     public Realm getRealm() {
         return realm;
     }
 
+
     private class RetrieveTokenTask extends AsyncTask<String, Void, JSONObject> {
 
         private static final String TAG = "Retrieve Token Task";
-        private User user = null;
-        private Bitmap img = null;
-        private Bitmap coverImg = null;
-
-
+        private String displayName;
+        private String imgUrl;
+        private String coverImgUrl;
+        private Bitmap img;
+        private Bitmap coverImg;
 
         @Override
         protected JSONObject doInBackground(String... params) {
+            displayName = null;
+            imgUrl = null;
+            coverImgUrl = null;
             img = null;
             coverImg = null;
             String accountName = params[0];
-            user = new User(selectedAccountName);
+
             String scopes = "oauth2:https://www.googleapis.com/auth/plus.login "
                     + YouTubeScopes.YOUTUBE_READONLY;
-            String token = null;
+            String token;
             JSONObject jsonObject = null;
+
             try {
                 token = GoogleAuthUtil.getToken(getApplicationContext(), accountName, scopes);
 
@@ -650,20 +696,16 @@ public class MainActivity extends AppCompatActivity  {
                             jsonObject = new JSONObject(content);
                             if (jsonObject != null) {
                                 if (jsonObject.has("image")) {
-                                    String imgUrl = jsonObject.getJSONObject("image").getString("url");
-                                    user.setImgURL(imgUrl);
-                                    img = ImageLoader.getInstance()
-                                            .loadImageSync(imgUrl);
+                                    imgUrl = jsonObject.getJSONObject("image").getString("url");
+                                    img = ImageLoader.getInstance().loadImageSync(imgUrl);
                                 }
                                 if (jsonObject.has("cover") &&
                                         jsonObject.getJSONObject("cover").has("coverPhoto")) {
-                                    String coverImgUrl = jsonObject
+                                    coverImgUrl = jsonObject
                                             .getJSONObject("cover")
                                             .getJSONObject("coverPhoto")
                                             .getString("url");
-                                    user.setCoverImgURL(coverImgUrl);
-                                    coverImg = ImageLoader.getInstance()
-                                            .loadImageSync(coverImgUrl);
+                                    coverImg = ImageLoader.getInstance().loadImageSync(coverImgUrl);
                                 }
                             }
                         } catch (JSONException e) {
@@ -683,25 +725,43 @@ public class MainActivity extends AppCompatActivity  {
             } catch (GoogleAuthException e) {
                 e.printStackTrace();
             }
+
             return jsonObject;
         }
 
+
         @Override
         protected void onPostExecute(JSONObject jsonObject) {
-            if (jsonObject == null) {
+            if (jsonObject == null || realm.isClosed()) {
                 updateSelectionAccountHeader();
                 return;
             }
 
-            IProfile activeProfile = accountHeader.getActiveProfile();
-            if (jsonObject.has("displayName")) {
-                try {
-                    user.setDisplayName(jsonObject.getString("displayName"));
-                    activeProfile.withName(jsonObject.getString("displayName"));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+            updateUserData();
+            updateAccountHeader();
+        }
+
+
+        private void updateUserData() {
+            realm.beginTransaction();
+
+            if (!TextUtils.isEmpty(displayName) && !displayName.equals(user.getDisplayName())) {
+                user.setDisplayName(displayName);
             }
+            if (!TextUtils.isEmpty(imgUrl) && !imgUrl.equals(user.getImgURL())) {
+                user.setImgURL(imgUrl);
+            }
+            if (!TextUtils.isEmpty(coverImgUrl) && !coverImgUrl.equals(user.getCoverImgURL())) {
+                user.setCoverImgURL(coverImgUrl);
+            }
+
+            realm.commitTransaction();
+        }
+
+
+        private void updateAccountHeader() {
+            IProfile activeProfile = accountHeader.getActiveProfile();
+            activeProfile.withName(user.getDisplayName());
             if (img != null) {
                 activeProfile.withIcon(img);
             }
@@ -713,33 +773,6 @@ public class MainActivity extends AppCompatActivity  {
                 accountHeader.setBackgroundRes(R.drawable.header);
             }
             accountHeader.updateProfile(activeProfile);
-
-            updateUserData();
-//            HabitApplication.getInstance().updateUser(new UserDao(realm), user);
-            MainActivity.this.getSharedPreferences("HabitAppPreferences", MODE_PRIVATE)
-                    .edit().putString("default_account", selectedAccountName).commit();
         }
-
-        private void updateUserData() {
-            UserDao userDao = new UserDao(realm);
-            User userFromDB = userDao.getUserByName(selectedAccountName);
-            if (userFromDB == null) {
-                HabitApplication.getInstance().setCurrentUser(userDao, user);
-            } else {
-                realm.beginTransaction();
-                if (user.getDisplayName() != null && !user.getDisplayName().isEmpty()) {
-                    userFromDB.setDisplayName(user.getDisplayName());
-                }
-                if (user.getImgURL() != null && !user.getImgURL().isEmpty()) {
-                    userFromDB.setImgURL(user.getImgURL());
-                }
-                if (user.getCoverImgURL() != null && !user.getCoverImgURL().isEmpty()) {
-                    userFromDB.setCoverImgURL(user.getCoverImgURL());
-                }
-                realm.commitTransaction();
-                HabitApplication.getInstance().setCurrentUser(userDao, userFromDB);
-            }
-        }
-
     }
 }

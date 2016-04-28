@@ -16,13 +16,18 @@ public class SearchHistory extends RealmObject {
     private String word;
     private Date date;
 
+    private boolean isSyncronized;
+
     public SearchHistory() {
         this.id = UUID.randomUUID().toString();
+        this.isSyncronized = false;
     }
+
 
     public SearchHistory(String word) {
         this(word, new Date());
     }
+
 
     public SearchHistory(String word, Date date) {
         this();
@@ -30,27 +35,43 @@ public class SearchHistory extends RealmObject {
         this.date = date;
     }
 
+
     public String getId() {
         return id;
     }
+
 
     public void setId(String id) {
         this.id = id;
     }
 
+
     public String getWord() {
         return word;
     }
+
 
     public void setWord(String word) {
         this.word = word;
     }
 
+
     public Date getDate() {
         return date;
     }
 
+
     public void setDate(Date date) {
         this.date = date;
+    }
+
+
+    public boolean isSyncronized() {
+        return isSyncronized;
+    }
+
+
+    public void setSyncronized(boolean isSyncronized) {
+        this.isSyncronized = isSyncronized;
     }
 }

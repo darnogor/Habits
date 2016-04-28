@@ -1,5 +1,8 @@
 package com.blakit.petrenko.habits;
 
+import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -10,6 +13,8 @@ import android.widget.TextView;
 
 import com.blakit.petrenko.habits.dao.HabitDao;
 import com.blakit.petrenko.habits.model.Category;
+import com.blakit.petrenko.habits.utils.Utils;
+import com.wnafee.vector.MorphButton;
 
 import java.util.List;
 
@@ -33,17 +38,28 @@ public class CategoryFragment extends Fragment {
 
         realm = Realm.getDefaultInstance();
 
-        List<Category> categories = new HabitDao(realm)
-                .getCategories();
-
+        List<Category> categories = new HabitDao(realm).getCategories();
         LinearLayout categoryList = (LinearLayout) view.findViewById(R.id.category_list);
-        for (Category c: categories) {
-            View itemView = inflater.inflate(R.layout.category_item, null);
 
+        for (final Category c: categories) {
+            View itemView = inflater.inflate(R.layout.item_category, null);
 
+            MorphButton icon = (MorphButton) itemView.findViewById(R.id.category_icon);
+            TextView tv      = (TextView) itemView.findViewById(R.id.category_name);
 
-            TextView tv = (TextView) itemView.findViewById(R.id.category_name);
-            tv.setText(c.getNameRes());
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getActivity(), AddHabitActivity.class);
+                    intent.putExtra("category", c.getNameRes());
+
+                    startActivity(intent);
+                    getActivity().overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left_half);
+                }
+            });
+
+            icon.setForegroundTintList(ColorStateList.valueOf(Color.parseColor(c.getColor())));
+            tv.setText(Utils.getStringByResName(getActivity(), c.getNameRes()));
 
             categoryList.addView(itemView);
         }

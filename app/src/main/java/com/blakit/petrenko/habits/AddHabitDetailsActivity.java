@@ -1,28 +1,41 @@
 package com.blakit.petrenko.habits;
 
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ContextThemeWrapper;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
+import com.blakit.petrenko.habits.adapter.ArticleLinearAdapter;
+import com.blakit.petrenko.habits.adapter.DaysAdapter;
+import com.blakit.petrenko.habits.adapter.VideoLinearAdapter;
+import com.blakit.petrenko.habits.dao.HabitDao;
 import com.blakit.petrenko.habits.dao.UserDao;
 import com.blakit.petrenko.habits.model.Habit;
 import com.blakit.petrenko.habits.model.HabitDetails;
+import com.blakit.petrenko.habits.model.User;
 import com.blakit.petrenko.habits.utils.ColorGenerator;
+import com.blakit.petrenko.habits.utils.Utils;
 import com.blakit.petrenko.habits.view.AppBarStateChangeListener;
-import com.blakit.petrenko.habits.view.DaysItemDecoration;
 import com.blakit.petrenko.habits.view.FontTextView;
-import com.blakit.petrenko.habits.view.MarginDecoration;
+import com.blakit.petrenko.habits.view.decoration.DaysItemDecoration;
+import com.blakit.petrenko.habits.view.decoration.MarginDecoration;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 
@@ -36,7 +49,13 @@ public class AddHabitDetailsActivity extends AppCompatActivity {
     private Habit habit;
     private HabitDetails habitDetails;
 
-    private int color = ColorGenerator.MATERIAL.getRandomColor();
+    private int colorCategory = ColorGenerator.MATERIAL.getRandomColor();
+
+    private AlertDialog addHabitDialog;
+    private AlertDialog createCopyDialog;
+    private AlertDialog editDialog;
+    private AlertDialog deleteDialog;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,14 +64,98 @@ public class AddHabitDetailsActivity extends AppCompatActivity {
 
         realm = Realm.getDefaultInstance();
 
-        habit = Parcels.unwrap(getIntent().getParcelableExtra("habit"));
-        habitDetails = new HabitDetails(HabitApplication.getInstance().getUser(), habit);
-
+        initData();
         initToolbar();
+        initDialogs();
         initHeaderAndDescription();
         initActions();
         initVideosAndArticles();
         initFab();
+    }
+
+
+    private void initDialogs() {
+        ContextThemeWrapper themeWrapper = new ContextThemeWrapper(this, R.style.AlertDialogTheme);
+
+        addHabitDialog = new AlertDialog.Builder(themeWrapper)
+                .setTitle(R.string.add_habit_details_dialog_add_habit_title)
+                .setMessage(R.string.add_habit_details_dialog_add_habit_message)
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        UserDao userDao = new UserDao(realm);
+                        userDao.createOrUpdateHabitDetails(habitDetails);
+
+                        finish();
+                    }
+                })
+                .setNegativeButton(R.string.no, null)
+                .setCancelable(true)
+                .create();
+
+        createCopyDialog = new AlertDialog.Builder(themeWrapper)
+                .setTitle(R.string.add_habit_details_dialog_create_copy_title)
+                .setMessage(R.string.add_habit_details_dialog_create_copy_message)
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intentCreate = new Intent(AddHabitDetailsActivity.this, CreateHabitActivity.class);
+
+                        intentCreate.putExtra("habit", Parcels.wrap(Habit.class, habit));
+                        intentCreate.putExtra("is_edit", false);
+                        intentCreate.putExtra("accName", habitDetails.getUser().getName());
+
+                        startActivity(intentCreate);
+                        overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left_half);
+                    }
+                })
+                .setNegativeButton(R.string.no, null)
+                .setCancelable(true)
+                .create();
+
+        editDialog = new AlertDialog.Builder(themeWrapper)
+                .setTitle(R.string.add_habit_details_dialog_edit_title)
+                .setMessage(R.string.add_habit_details_dialog_edit_message)
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intentEdit = new Intent(AddHabitDetailsActivity.this, CreateHabitActivity.class);
+
+                        intentEdit.putExtra("habit", Parcels.wrap(Habit.class, habit));
+                        intentEdit.putExtra("is_edit", true);
+                        intentEdit.putExtra("accName", habitDetails.getUser().getName());
+
+                        startActivity(intentEdit);
+                        overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left_half);
+                    }
+                })
+                .setNegativeButton(R.string.no, null)
+                .setCancelable(true)
+                .create();
+
+        deleteDialog = new AlertDialog.Builder(themeWrapper)
+                .setTitle(R.string.add_habit_details_dialog_delete_title)
+                .setMessage(R.string.add_habit_details_dialog_delete_message)
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        new HabitDao(realm).setDeleteHabit(habit.getId());
+                        finish();
+                    }
+                })
+                .setNegativeButton(R.string.no, null)
+                .setCancelable(true)
+                .create();
+    }
+
+
+    private void initData() {
+        User user = new UserDao(realm).getUserByName(HabitApplication.getInstance().getUsername());
+
+        habit = Parcels.unwrap(getIntent().getParcelableExtra("habit"));
+        habitDetails = new HabitDetails(user, habit);
+
+        colorCategory = Color.parseColor(habit.getCategory().getColor());
     }
 
 
@@ -68,8 +171,8 @@ public class AddHabitDetailsActivity extends AppCompatActivity {
         final CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.add_habit_details_collapsingToolbarLayout);
         final AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.add_habit_details_appBarLayout);
 
-        collapsingToolbarLayout.setContentScrimColor(color);
-        collapsingToolbarLayout.setStatusBarScrimColor(color);
+        collapsingToolbarLayout.setContentScrimColor(colorCategory);
+        collapsingToolbarLayout.setStatusBarScrimColor(colorCategory);
 
         appBarLayout.addOnOffsetChangedListener(new AppBarStateChangeListener((int) (toolbar.getMeasuredHeight()*1.2)) {
             @Override
@@ -86,15 +189,22 @@ public class AddHabitDetailsActivity extends AppCompatActivity {
 
     private void initHeaderAndDescription() {
         ImageView headerImage = (ImageView) findViewById(R.id.add_habit_details_header);
-        headerImage.setImageDrawable(new ColorDrawable(color));
+        headerImage.setImageDrawable(new ColorDrawable(colorCategory));
 
-        FontTextView title       = (FontTextView) findViewById(R.id.add_habit_details_title);
-        FontTextView category    = (FontTextView) findViewById(R.id.add_habit_details_category);
-        FontTextView description = (FontTextView) findViewById(R.id.add_habit_details_description);
+        FontTextView title         = (FontTextView) findViewById(R.id.add_habit_details_title);
+        FontTextView category      = (FontTextView) findViewById(R.id.add_habit_details_category);
+        FontTextView description   = (FontTextView) findViewById(R.id.add_habit_details_description);
+        FontTextView author        = (FontTextView) findViewById(R.id.add_habit_details_author);
+        FontTextView addCount      = (FontTextView) findViewById(R.id.add_habit_details_add_count);
+        FontTextView completeCount = (FontTextView) findViewById(R.id.add_habit_details_complete_count);
 
         title.setText(habit.getName());
-        //category.setText(Utils.getStringByResName(this, habit.getCategory().getNameRes()));
+        category.setText(Utils.getStringByResName(this, habit.getCategory().getNameRes()));
         description.setText(habit.getDescription());
+
+        author.setText(Html.fromHtml(getString(R.string.add_habit_details_additional_info_author) + " <b>" + habit.getAuthor() + "</b>"));
+        addCount.setText(Html.fromHtml(getString(R.string.add_habit_details_additional_info_add_count) + " <b>" + habit.getAddCount() + "</b>"));
+        completeCount.setText(Html.fromHtml(getString(R.string.add_habit_details_additional_info_complete_count) + " <b>" + habit.getCompleteCount() + "</b>"));
     }
 
 
@@ -112,32 +222,56 @@ public class AddHabitDetailsActivity extends AppCompatActivity {
 
 
     private void initVideosAndArticles() {
-        final RecyclerView videosRecyclerView   = (RecyclerView) findViewById(R.id.add_habit_details_videos_recyclerView);
+        RelativeLayout videosLayout       = (RelativeLayout) findViewById(R.id.add_habit_details_videos_layout);
+        RelativeLayout articlesLayout     = (RelativeLayout) findViewById(R.id.add_habit_details_articles_layout);
+        RecyclerView videosRecyclerView   = (RecyclerView) findViewById(R.id.add_habit_details_videos_recyclerView);
         RecyclerView articlesRecyclerView = (RecyclerView) findViewById(R.id.add_habit_details_articles_recyclerView);
         FontTextView videosShowAll        = (FontTextView) findViewById(R.id.add_habit_details_videos_all);
         FontTextView articlesShowAll      = (FontTextView) findViewById(R.id.add_habit_details_articles_all);
 
+        if (habit.getRelatedVideoItems().isEmpty()) {
+            videosLayout.setVisibility(View.GONE);
+        } else {
+            videosLayout.setVisibility(View.VISIBLE);
+        }
+
+        if (habit.getRelatedArticles().isEmpty()) {
+            articlesLayout.setVisibility(View.GONE);
+        } else {
+            articlesLayout.setVisibility(View.VISIBLE);
+        }
+
         videosRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         videosRecyclerView.addItemDecoration(new MarginDecoration(this));
-        videosRecyclerView.setAdapter(new VideoItemAdapter(this, videosRecyclerView, habit.getRelatedVideoItems()));
+        videosRecyclerView.setAdapter(new VideoLinearAdapter(this, videosRecyclerView, habit.getRelatedVideoItems()));
         videosRecyclerView.setNestedScrollingEnabled(false);
 
 
         articlesRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         articlesRecyclerView.addItemDecoration(new MarginDecoration(this));
-        articlesRecyclerView.setAdapter(new ArticlesAdapter(this, articlesRecyclerView, habit.getRelatedArticles()));
+        articlesRecyclerView.setAdapter(new ArticleLinearAdapter(this, articlesRecyclerView, habit.getRelatedArticles()));
         articlesRecyclerView.setNestedScrollingEnabled(false);
 
         videosShowAll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent intent = new Intent(AddHabitDetailsActivity.this, ShowAllActivity.class);
+                intent.putExtra("show_all_mode", ShowAllActivity.SHOW_ALL_VIDEOS);
+                intent.putExtra("habit", Parcels.wrap(Habit.class, habit));
 
+                startActivity(intent);
+                overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left_half);
             }
         });
         articlesShowAll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent intent = new Intent(AddHabitDetailsActivity.this, ShowAllActivity.class);
+                intent.putExtra("show_all_mode", ShowAllActivity.SHOW_ALL_ARTICLES);
+                intent.putExtra("habit", Parcels.wrap(Habit.class, habit));
 
+                startActivity(intent);
+                overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left_half);
             }
         });
     }
@@ -152,7 +286,11 @@ public class AddHabitDetailsActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addHabitClicked();
+                int color = ContextCompat.getColor(AddHabitDetailsActivity.this, R.color.md_grey_600);
+
+                addHabitDialog.show();
+                addHabitDialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(color);
+                addHabitDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(color);
             }
         });
     }
@@ -161,6 +299,8 @@ public class AddHabitDetailsActivity extends AppCompatActivity {
     private void addHabitClicked() {
         UserDao userDao = new UserDao(realm);
         userDao.createOrUpdateHabitDetails(habitDetails);
+
+        finish();
     }
 
 
@@ -178,7 +318,7 @@ public class AddHabitDetailsActivity extends AppCompatActivity {
         MenuItem edit   = menu.findItem(R.id.menu_add_habit_details_edit);
         MenuItem delete = menu.findItem(R.id.menu_add_habit_details_delete);
 
-        if (!HabitApplication.getInstance().getUser().getName()
+        if (!HabitApplication.getInstance().getUsername()
                 .equals(habitDetails.getHabit().getAuthor())) {
             edit.setVisible(false);
             delete.setVisible(false);
@@ -190,18 +330,33 @@ public class AddHabitDetailsActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        int color = ContextCompat.getColor(this, R.color.md_grey_600);
+
         switch (item.getItemId()) {
             case android.R.id.home:
                 onBackPressed();
                 break;
+
             case R.id.menu_add_habit_details_add:
                 addHabitClicked();
                 break;
+
             case R.id.menu_add_habit_details_create_copy:
+                createCopyDialog.show();
+                createCopyDialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(color);
+                createCopyDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(color);
                 break;
+
             case R.id.menu_add_habit_details_edit:
+                editDialog.show();
+                editDialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(color);
+                editDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(color);
                 break;
+
             case R.id.menu_add_habit_details_delete:
+                deleteDialog.show();
+                deleteDialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(color);
+                deleteDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(color);
                 break;
         }
         return super.onOptionsItemSelected(item);

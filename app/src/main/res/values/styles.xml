@@ -11,6 +11,7 @@
         <item name="windowActionBar">false</item>
         <item name="android:textColor">@color/textColor</item>
         <item name="colorControlNormal">@color/colorControlNormal</item>
+        <item name="colorControlHighlight">@color/md_grey_400</item>
 
         <item name="popupMenuStyle">@style/PopupMenuStyle</item>
         <item name="android:popupMenuStyle">@style/PopupMenuStyle</item>
@@ -98,7 +99,7 @@
     </style>
 
     <style name="CreateTheme.Small.Youtube" parent="CreateTheme.Small">
-        <item name="android:paddingTop">3dp</item>
+        <item name="android:paddingTop">0dp</item>
     </style>
 
     <style name="VideoItem.Small" parent="CreateTheme.Small.Youtube">
@@ -164,6 +165,31 @@
     <style name="TextAppearance.AlertTitle" parent="TextAppearance.AppCompat.Large">
         <item name="android:textColor">@color/md_white_1000</item>
         <item name="android:textStyle">bold</item>
+    </style>
+
+
+    <style name="SettingsTheme.Header.Font" parent="TextAppearance.AppCompat.Small">
+        <item name="android:textColor">?attr/colorPrimary</item>
+        <item name="font">OpenSans-Regular</item>
+        <item name="android:layout_marginLeft">30dp</item>
+        <item name="android:layout_marginTop">15dp</item>
+        <item name="android:layout_marginBottom">10dp</item>
+    </style>
+
+    <style name="SettingsTheme.PrimaryText.Font" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:textColor">@color/md_grey_800</item>
+        <item name="font">OpenSans-Regular</item>
+        <item name="android:layout_marginLeft">20dp</item>
+        <item name="android:layout_marginRight">10dp</item>
+        <item name="android:layout_marginTop">15dp</item>
+    </style>
+
+    <style name="SettingsTheme.SecondaryText.Font" parent="TextAppearance.AppCompat.Small">
+        <item name="android:textColor">@color/md_grey_600</item>
+        <item name="font">OpenSans-Regular</item>
+        <item name="android:layout_marginLeft">20dp</item>
+        <item name="android:layout_marginRight">10dp</item>
+        <item name="android:layout_marginBottom">15dp</item>
     </style>
 
 </resources>

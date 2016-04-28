@@ -75,6 +75,20 @@
                         style="@style/EditTextTheme.Size"
                         android:theme="@style/EditTextTheme"/>
 
+                    <com.blakit.petrenko.habits.view.FontTextView
+                        style="@style/CreateTheme.Normal.Font"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/create_habit_category"/>
+
+
+                    <Spinner
+                        android:id="@+id/create_habit_category_spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@android:style/Widget.Holo.Light.Spinner"
+                        android:layout_margin="14dp"/>
+
                     <CheckBox
                         android:id="@+id/create_habit_send_checkbox"
                         style="@style/CheckBoxTheme.Size"
@@ -342,6 +356,7 @@
     </android.support.v4.widget.NestedScrollView>
 
     <android.support.design.widget.FloatingActionButton
+        android:id="@+id/create_habit_save"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
@@ -350,7 +365,7 @@
         app:backgroundTint="?attr/colorPrimary"
         app:layout_anchor="@id/create_habit_card"
         app:layout_anchorGravity="bottom|right|end"
-        android:id="@+id/create_habit_save"
+        app:layout_behavior="com.blakit.petrenko.habits.view.ScrollAwareFabBehavior"
         />
 
 

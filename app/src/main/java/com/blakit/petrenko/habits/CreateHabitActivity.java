@@ -4,7 +4,6 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -25,26 +24,33 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.blakit.petrenko.habits.adapter.CategorySpinnerAdapter;
+import com.blakit.petrenko.habits.adapter.CreateDaysAdapter;
+import com.blakit.petrenko.habits.adapter.TextWatcherAdapter;
 import com.blakit.petrenko.habits.dao.HabitDao;
 import com.blakit.petrenko.habits.model.Action;
 import com.blakit.petrenko.habits.model.Article;
+import com.blakit.petrenko.habits.model.Category;
 import com.blakit.petrenko.habits.model.Habit;
 import com.blakit.petrenko.habits.model.VideoItem;
+import com.blakit.petrenko.habits.utils.Callable;
 import com.blakit.petrenko.habits.utils.Config;
 import com.blakit.petrenko.habits.utils.Resources;
 import com.blakit.petrenko.habits.utils.Utils;
 import com.blakit.petrenko.habits.view.FontTextView;
-import com.blakit.petrenko.habits.view.GridLineItemDecoration;
-import com.blakit.petrenko.habits.view.MarginDecoration;
+import com.blakit.petrenko.habits.view.decoration.GridLineItemDecoration;
+import com.blakit.petrenko.habits.view.decoration.MarginDecoration;
 import com.blakit.petrenko.habits.view.WrapGridLayoutManager;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
@@ -62,6 +68,7 @@ import com.google.api.services.youtube.model.VideoListResponse;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.iconics.view.IconicsImageView;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 import org.joda.time.Period;
 import org.joda.time.format.ISOPeriodFormat;
@@ -69,11 +76,13 @@ import org.joda.time.format.PeriodFormatter;
 import org.parceler.Parcels;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import io.realm.Realm;
 
@@ -83,7 +92,6 @@ public class CreateHabitActivity extends AppCompatActivity {
 
     private Habit habit;
 
-    private String defaultAction = "";
     private boolean isSavePressed = false;
     private int showingDay = -1;
 
@@ -101,9 +109,10 @@ public class CreateHabitActivity extends AppCompatActivity {
     private LinearLayout videoNon;
     private LinearLayout articleNon;
 
+    private AlertDialog removeWeekDialog;
     private AlertDialog exitDialog;
     private boolean isDataChanged = false;
-    private AlertDialog saveDialog;
+    private AlertDialog saveErrorDialog;
 
 
 
@@ -119,7 +128,6 @@ public class CreateHabitActivity extends AppCompatActivity {
 
         if(savedInstanceState != null) {
             habit = Parcels.unwrap(savedInstanceState.getParcelable("habit"));
-            defaultAction = savedInstanceState.getString("default_action");
             isSavePressed = savedInstanceState.getBoolean("is_save_pressed");
             showingDay    = savedInstanceState.getInt("showing_day");
 
@@ -150,7 +158,11 @@ public class CreateHabitActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
             setSupportActionBar(toolbar);
-            getSupportActionBar().setTitle(R.string.nav_menu_item_create);
+            if (!getIntent().getBooleanExtra("is_edit", false)) {
+                getSupportActionBar().setTitle(R.string.nav_menu_item_create);
+            } else {
+                getSupportActionBar().setTitle(R.string.add_habit_details_dialog_edit_title);
+            }
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
     }
@@ -160,8 +172,20 @@ public class CreateHabitActivity extends AppCompatActivity {
         addVideoDialog   = new AddYouTubeVideoDialog();
         addArticleDialog = new AddArticleDialog();
 
-        ContextThemeWrapper themeWrapper
-                = new ContextThemeWrapper(CreateHabitActivity.this, R.style.AlertDialogTheme);
+        ContextThemeWrapper themeWrapper = new ContextThemeWrapper(this, R.style.AlertDialogTheme);
+
+        removeWeekDialog = new AlertDialog.Builder(themeWrapper)
+                .setTitle(R.string.create_habit_remove_week)
+                .setMessage(R.string.create_habit_remove_week_message)
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ((CreateDaysAdapter) daysView.getAdapter()).removeWeek();
+                    }
+                })
+                .setNegativeButton(R.string.no, null)
+                .setCancelable(true)
+                .create();
 
         exitDialog = new AlertDialog.Builder(themeWrapper)
                 .setTitle(R.string.back_to_menu)
@@ -178,7 +202,7 @@ public class CreateHabitActivity extends AppCompatActivity {
                 .setCancelable(true)
                 .create();
 
-        saveDialog = new AlertDialog.Builder(themeWrapper)
+        saveErrorDialog = new AlertDialog.Builder(themeWrapper)
                 .setTitle(R.string.create_habit_save_error_dialog_title)
                 .setMessage(R.string.create_habit_save_error_dialog_message)
                 .setPositiveButton(R.string.ok, null)
@@ -189,9 +213,24 @@ public class CreateHabitActivity extends AppCompatActivity {
 
     private void initHabit() {
         if (habit == null) {
-            habit = new Habit("","");
+            habit = Parcels.unwrap(getIntent().getParcelableExtra("habit"));
+            if (habit == null) {
+                habit = new Habit("", "");
+            }
+            if(!getIntent().getBooleanExtra("is_edit", false)) {
+                habit.setId(UUID.randomUUID().toString());
+                habit.setAddCount(0);
+                habit.setCompleteCount(0);
+                for (Action action: habit.getActions()) {
+                    action.setId(UUID.randomUUID().toString());
+                }
+                for (Article article: habit.getRelatedArticles()) {
+                    article.setId(UUID.randomUUID().toString());
+                }
+            }
+            habit.setCreationDate(new Date());
         }
-        habit.setAuthor(HabitApplication.getInstance().getUser().getName());
+        habit.setAuthor(HabitApplication.getInstance().getUsername());
     }
 
 
@@ -236,6 +275,29 @@ public class CreateHabitActivity extends AppCompatActivity {
             }
         });
 
+        Spinner categorySpinner = (Spinner) findViewById(R.id.create_habit_category_spinner);
+
+        CategorySpinnerAdapter categoryAdapter
+                = new CategorySpinnerAdapter(this, new HabitDao(realm).getCategories());
+        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        categorySpinner.setAdapter(categoryAdapter);
+        if (habit.getCategory() != null) {
+            categorySpinner.setSelection(categoryAdapter
+                    .getCategoryPosition(habit.getCategory().getNameRes()));
+        }
+        categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                habit.setCategory((Category) parent.getItemAtPosition(position));
+            }
+
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         final CheckBox sendCheckBox = (CheckBox) findViewById(R.id.create_habit_send_checkbox);
         sendCheckBox.setTypeface(Resources.getInstance().getTypeface("OpenSans-Light"));
@@ -245,11 +307,11 @@ public class CreateHabitActivity extends AppCompatActivity {
     private void initActions() {
         defaultActions = (EditText) findViewById(R.id.create_habit_actions_default);
 
-        defaultActions.setText(defaultAction);
+        defaultActions.setText(habit.getDefaultAction());
         defaultActions.addTextChangedListener(new TextWatcherAdapter() {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                defaultAction = s.toString();
+                habit.setDefaultAction(s.toString());
                 isDataChanged = true;
                 defaultActions.setBackgroundResource(R.drawable.edit_text_back);
             }
@@ -294,7 +356,13 @@ public class CreateHabitActivity extends AppCompatActivity {
         View.OnClickListener remove = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((CreateDaysAdapter) daysView.getAdapter()).removeWeek();
+                if (daysView.getAdapter().getItemCount() <= 21) {
+                    return;
+                }
+                removeWeekDialog.show();
+                int color = ContextCompat.getColor(CreateHabitActivity.this, R.color.md_grey_600);
+                removeWeekDialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(color);
+                removeWeekDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(color);
             }
         };
 
@@ -428,7 +496,7 @@ public class CreateHabitActivity extends AppCompatActivity {
             public void onClick(View v) {
                 for (Action action: habit.getActions()) {
                     if (action.isUseDefault()) {
-                        action.setAction(defaultAction);
+                        action.setAction(habit.getDefaultAction());
                     }
                 }
                 boolean isInputOK = true, isDefaultNeed = false;
@@ -442,7 +510,7 @@ public class CreateHabitActivity extends AppCompatActivity {
                 }
                 for (Action action: habit.getActions()) {
                     if (!action.isSkipped()) {
-                        if (TextUtils.isEmpty(defaultAction) && action.isUseDefault()) {
+                        if (TextUtils.isEmpty(habit.getDefaultAction()) && action.isUseDefault()) {
                             isDefaultNeed = true;
                             isInputOK = false;
                             break;
@@ -458,8 +526,15 @@ public class CreateHabitActivity extends AppCompatActivity {
                 if (isInputOK) {
                     HabitDao habitDao = new HabitDao(realm);
                     habitDao.createOrUpdate(habit);
+
+                    Intent intent = new Intent(CreateHabitActivity.this, HabitListActivity.class);
+                    intent.putExtra("habits_type", HabitListActivity.HABITS_CREATED);
+
+                    startActivity(intent);
+                    overridePendingTransition(R.anim.enter_from_right, R.anim.exit_to_left_half);
+
                     isDataChanged = false;
-                    onBackPressed();
+                    finish();
                 } else {
                     ((CreateDaysAdapter) daysView.getAdapter()).setSavePressed(true);
                     daysView.getAdapter().notifyDataSetChanged();
@@ -467,9 +542,9 @@ public class CreateHabitActivity extends AppCompatActivity {
                         daysHeader.performClick();
                     }
 
-                    saveDialog.show();
+                    saveErrorDialog.show();
                     int color = ContextCompat.getColor(CreateHabitActivity.this, R.color.md_grey_600);
-                    saveDialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(color);
+                    saveErrorDialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(color);
                 }
             }
         });
@@ -494,12 +569,18 @@ public class CreateHabitActivity extends AppCompatActivity {
         }
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        final View view = inflater.inflate(R.layout.articles_item_create_habit, articlesLayout, false);
+        final View view = inflater.inflate(R.layout.item_article_line, articlesLayout, false);
 
-        TextView title = (TextView) view.findViewById(R.id.create_habit_article_title);
-        IconicsImageView more = (IconicsImageView) view.findViewById(R.id.create_habit_article_menu);
+        TextView titleTextView = (TextView) view.findViewById(R.id.create_habit_article_title);
+        TextView urlTextView   = (TextView) view.findViewById(R.id.create_habit_article_url);
+        IconicsImageView more  = (IconicsImageView) view.findViewById(R.id.create_habit_article_menu);
 
-        title.setText(article.getTitle());
+        titleTextView.setText(article.getTitle());
+        try {
+            urlTextView.setText(new URL(article.getUri()).getAuthority());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
 
         final PopupMenu menu = new PopupMenu(this, more);
         menu.inflate(R.menu.menu_create_habit);
@@ -529,7 +610,6 @@ public class CreateHabitActivity extends AppCompatActivity {
             }
         });
 
-        more.setIcon(GoogleMaterial.Icon.gmd_more_vert);
         more.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -550,109 +630,9 @@ public class CreateHabitActivity extends AppCompatActivity {
     }
 
 
-//    private View getActionView(ViewGroup parent, final int position) {
-//        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-//        View view = inflater.inflate(R.layout.actions_item_create_habit, parent, false);
-//
-//        final TextView dayTextView = (TextView) view.findViewById(R.id.create_habit_action_day_textview);
-//        final IconicsImageView checked = (IconicsImageView) view.findViewById(R.id.create_habit_actions_checked);
-//        final TextView skippedTextView = (TextView) view.findViewById(R.id.create_habit_action_skipped);
-//        final EditText dayEditText = (EditText) view.findViewById(R.id.create_habit_action_day);
-//
-//        dayTextView.setText(new StringBuilder()
-//                .append(getResources().getString(R.string.day))
-//                .append(" ")
-//                .append(position + 1)
-//                .toString());
-//
-//        Action action = Utils.getAction(habit, position+1);
-//
-//        ids[position] = Utils.generateViewId();
-//        dayEditText.setId(ids[position]);
-//        dayEditText.setText(action.getAction());
-//
-//        if (!action.isSkipped()) {
-//            checked.setIcon(GoogleMaterial.Icon.gmd_check_circle);
-//            checked.setColorRes(R.color.colorPrimary);
-//            skippedTextView.setText(R.string.create_habit_action_not_skipped);
-//        } else {
-//            checked.setIcon(GoogleMaterial.Icon.gmd_block);
-//            checked.setColorRes(R.color.createActionsSmallTextColor);
-//            skippedTextView.setText(R.string.create_habit_action_skipped);
-//            dayEditText.setEnabled(false);
-//        }
-//        skippedTextView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Action action = Utils.getAction(habit, position + 1);
-//
-//                if (!action.isSkipped()) {
-//                    action.setSkipped(true);
-//                    checked.setIcon(GoogleMaterial.Icon.gmd_block);
-//                    checked.setColorRes(R.color.createActionsSmallTextColor);
-//                    skippedTextView.setText(R.string.create_habit_action_skipped);
-//                    dayEditText.setEnabled(false);
-//                } else {
-//                    action.setSkipped(false);
-//                    checked.setIcon(GoogleMaterial.Icon.gmd_check_circle);
-//                    checked.setColorRes(R.color.colorPrimary);
-//                    skippedTextView.setText(R.string.create_habit_action_not_skipped);
-//                    dayEditText.setEnabled(true);
-//                }
-//            }
-//        });
-//
-//
-//        dayEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-//            @Override
-//            public void onFocusChange(View v, boolean hasFocus) {
-//                if (!hasFocus) {
-//                    if(dayEditText.getText().toString().equals(defaultAction) ||
-//                            dayEditText.getText().toString().equals("")) {
-//                        isDefaults[position] = true;
-//                        dayEditText.setText(defaultAction);
-//                    }
-////                    if (isDefaults[position] && defaultAction.equals("")) {
-////                        v.setBackgroundColor(ContextCompat
-////                                .getColor(CreateHabitActivity.this, R.color.md_red_200));
-////                    }
-//
-//                } else {
-//                    v.setBackgroundResource(R.drawable.edit_text_back);
-//                }
-//            }
-//        });
-//        dayEditText.addTextChangedListener(new TextWatcher() {
-//            @Override
-//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-//
-//            }
-//
-//            @Override
-//            public void onTextChanged(CharSequence s, int start, int before, int count) {
-//                isDataChanged = true;
-//                Utils.getAction(habit, position + 1).setAction(s.toString());
-//                if (!defaultAction.equals(s.toString())) {
-//                    isDefaults[position] = false;
-//                }
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable s) {
-//
-//            }
-//        });
-//
-//
-//        return view;
-//    }
-
-
-
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putParcelable("habit", Parcels.wrap(Habit.class, habit));
-        outState.putString("default_action", defaultAction);
         outState.putBoolean("is_save_pressed", isSavePressed);
         outState.putInt("showing_day", ((CreateDaysAdapter) daysView.getAdapter()).getShowingDay());
         outState.putBoolean("is_add_video_dialog_shown", addVideoDialog.isShowing());
@@ -660,6 +640,7 @@ public class CreateHabitActivity extends AppCompatActivity {
         outState.putBoolean("is_add_article_dialog_shown", addArticleDialog.isShowing());
         outState.putString("add_article_dialog_uri", addArticleDialog.getUri());
         outState.putString("add_article_dialog_title", addArticleDialog.getTitle());
+
         super.onSaveInstanceState(outState);
     }
 
@@ -735,9 +716,9 @@ public class CreateHabitActivity extends AppCompatActivity {
             List<VideoItem> videoItems = params[0];
 
             String token = context.getIntent().getStringExtra("mToken");
+            String accountName = context.getIntent().getStringExtra("accName");
             try {
-                String newToken = GoogleAuthUtil.getToken(context,
-                        context.getIntent().getStringExtra("accName"),
+                String newToken = GoogleAuthUtil.getToken(context, accountName,
                         "oauth2:"+YouTubeScopes.YOUTUBE_READONLY);
                 if (newToken != null) {
                     token = newToken;
@@ -755,7 +736,7 @@ public class CreateHabitActivity extends AppCompatActivity {
 
 
             for (VideoItem videoItem : videoItems) {
-                if (videoItem.getThumbnail() != null) {
+                if (videoItem.getThumbnailURL() != null) {
                     continue;
                 }
                 try {
@@ -797,12 +778,6 @@ public class CreateHabitActivity extends AppCompatActivity {
                         String url = video.getSnippet().getThumbnails().getMedium().getUrl();
                         if (url != null) {
                             videoItem.setThumbnailURL(url);
-                            try {
-                                videoItem.setThumbnail(BitmapFactory.decodeStream((InputStream) new URL(url).getContent()));
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                return null;
-                            }
                         }
                         Log.d("Title", videoItem.getTitle());
                         Log.d("Channel", videoItem.getChanel());
@@ -848,20 +823,23 @@ public class CreateHabitActivity extends AppCompatActivity {
 
         private View getView(final ViewGroup parent, final VideoItem videoItem) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
-            final View view = inflater.inflate(R.layout.videos_item_create_habit, parent, false);
+            final View view         = inflater.inflate(R.layout.item_video_line, parent, false);
 
-            ImageView thumbnailView = (ImageView) view.findViewById(R.id.create_habit_youtube_thumb);
-            TextView durationView = (TextView) view.findViewById(R.id.create_habit_youtube_duration);
-            TextView titleView = (TextView) view.findViewById(R.id.create_habit_youtube_title);
-            TextView channelView = (TextView) view.findViewById(R.id.create_habit_youtube_channel);
-            TextView viewsView = (TextView) view.findViewById(R.id.create_habit_youtube_views);
+            ImageView thumbnailView   = (ImageView) view.findViewById(R.id.create_habit_youtube_thumb);
+            TextView durationView     = (TextView) view.findViewById(R.id.create_habit_youtube_duration);
+            TextView titleView        = (TextView) view.findViewById(R.id.create_habit_youtube_title);
+            TextView channelView      = (TextView) view.findViewById(R.id.create_habit_youtube_channel);
+            TextView viewsView        = (TextView) view.findViewById(R.id.create_habit_youtube_views);
             IconicsImageView moreView = (IconicsImageView) view.findViewById(R.id.create_habit_youtube_menu);
 
-            int width = videoItem.getThumbnail().getWidth(),
-                    height = videoItem.getThumbnail().getHeight();
-            thumbnailView.getLayoutParams().height = height;
-            thumbnailView.getLayoutParams().width = width;
-            thumbnailView.setImageBitmap(videoItem.getThumbnail());
+//            int width  = videoItem.getThumbnail().getWidth();
+//            int height = videoItem.getThumbnail().getHeight();
+//
+//            thumbnailView.getLayoutParams().height = height;
+//            thumbnailView.getLayoutParams().width  = width;
+//            thumbnailView.setImageBitmap(videoItem.getThumbnail());
+
+            ImageLoader.getInstance().displayImage(videoItem.getThumbnailURL(), thumbnailView);
 
             durationView.setText(Utils.videoDurationByFormattedString(videoItem.getDuration()));
             titleView.setText(videoItem.getTitle());
@@ -942,7 +920,7 @@ public class CreateHabitActivity extends AppCompatActivity {
 
         protected AddYouTubeVideoDialog() {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
-            view = inflater.inflate(R.layout.add_video_dialog_create_habit, null, false);
+            view = inflater.inflate(R.layout.dialog_add_video_create_habit, null, false);
 
             input = (EditText) view.findViewById(R.id.create_habit_youtube_dialog_url);
             progress = (ProgressBar) view.findViewById(R.id.progressBar_in_dialog);
@@ -1057,9 +1035,7 @@ public class CreateHabitActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                     Log.d("Load task", "Before youtube builder");
-//                    if (true) {
-//                        throw new NullPointerException("Заебало");
-//                    }
+
                     YouTube youtube = new YouTube.Builder(new NetHttpTransport(), new JacksonFactory(),
                             new HttpRequestInitializer() {
                                 @Override
@@ -1108,12 +1084,6 @@ public class CreateHabitActivity extends AppCompatActivity {
                             String url = video.getSnippet().getThumbnails().getMedium().getUrl();
                             if (url != null) {
                                 videoItem.setThumbnailURL(url);
-                                try {
-                                    videoItem.setThumbnail(BitmapFactory.decodeStream((InputStream) new URL(url).getContent()));
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                    return null;
-                                }
                             }
                             Log.d("Title", videoItem.getTitle());
                             Log.d("Channel", videoItem.getChanel());
@@ -1142,42 +1112,13 @@ public class CreateHabitActivity extends AppCompatActivity {
                     }
                     video = videoItem;
                     videoView.setVisibility(View.VISIBLE);
-                    int width = videoItem.getThumbnail().getWidth(),
-                            height = videoItem.getThumbnail().getHeight();
-                    thumbnailView.getLayoutParams().height = height;
-                    thumbnailView.getLayoutParams().width = width;
-                    thumbnailView.setImageBitmap(videoItem.getThumbnail());
 
-                    Log.d("Duration", videoItem.getDuration());
-                    PeriodFormatter formatter = ISOPeriodFormat.standard();
-                    Period p = formatter.parsePeriod(videoItem.getDuration());
-                    StringBuilder builder = new StringBuilder();
-                    if (p.toStandardHours().getHours() > 0) {
-                        builder.append(p.toStandardHours().getHours());
-                        builder.append(":");
-                    }
-                    if (p.getMinutes() < 10) {
-                        builder.append("0");
-                    }
-                    builder.append(p.getMinutes());
-                    builder.append(":");
-                    if (p.getSeconds() < 10) {
-                        builder.append("0");
-                    }
-                    builder.append(p.getSeconds());
-                    durationView.setText(builder);
+                    ImageLoader.getInstance().displayImage(videoItem.getThumbnailURL(), thumbnailView);
 
-                    String num = videoItem.getViewsCount();
-                    builder.setLength(0);
-                    builder.append(num);
-                    for (int i = num.length()-3; i > 0; i -= 3) {
-                        builder.insert(i, ',');
-                    }
-                    builder.insert(0, context.getString(R.string.create_habit_youtube_views) + " ");
-
+                    durationView.setText(Utils.videoDurationByFormattedString(videoItem.getDuration()));
                     titleView.setText(videoItem.getTitle());
                     channelView.setText(videoItem.getChanel());
-                    viewsView.setText(builder);
+                    viewsView.setText(Utils.viewsCountByNumberString(context, videoItem.getViewsCount()));
                 }
             };
         }
@@ -1210,6 +1151,8 @@ public class CreateHabitActivity extends AppCompatActivity {
         private EditText urlInput;
         private EditText titleInput;
 
+        private ProgressBar progress;
+
         private TextView urlWarning;
         private TextView titleWarning;
 
@@ -1217,10 +1160,12 @@ public class CreateHabitActivity extends AppCompatActivity {
             CreateHabitActivity context = CreateHabitActivity.this;
 
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
-            View view = inflater.inflate(R.layout.add_article_dialog_create_habit, null, false);
+            View view = inflater.inflate(R.layout.dialog_add_article_create_habit, null, false);
 
-            urlInput   = (EditText) view.findViewById(R.id.create_habit_article_dialog_url);
-            titleInput = (EditText) view.findViewById(R.id.create_habit_article_dialog_title);
+            urlInput     = (EditText) view.findViewById(R.id.create_habit_article_dialog_url);
+            titleInput   = (EditText) view.findViewById(R.id.create_habit_article_dialog_title);
+
+            progress     = (ProgressBar) view.findViewById(R.id.create_habit_article_dialog_progress);
 
             urlWarning   = (TextView) view.findViewById(R.id.create_habit_article_dialog_url_warning);
             titleWarning = (TextView) view.findViewById(R.id.create_habit_article_dialog_title_warning);
@@ -1240,6 +1185,7 @@ public class CreateHabitActivity extends AppCompatActivity {
                 @Override
                 public void afterTextChanged(Editable s) {
                     urlWarning.setVisibility(View.GONE);
+
                     String uriStr = s.toString();
                     for (Article a: habit.getRelatedArticles()) {
                         if (a.getUri().equals(uriStr)) {
@@ -1253,12 +1199,25 @@ public class CreateHabitActivity extends AppCompatActivity {
                         urlWarning.setVisibility(View.VISIBLE);
                         return;
                     }
+
                     if (article == null) {
                         article = new Article(uriStr);
                     } else {
                         article.setUri(uriStr);
                     }
                     article.setTitle(getTitle());
+
+                    if (TextUtils.isEmpty(titleInput.getText().toString())) {
+                        Utils.parseTitleByURL(uriStr, new Callable<String, Void>() {
+                            @Override
+                            public Void call(String... strings) {
+                                if (TextUtils.isEmpty(titleInput.getText().toString())) {
+                                    titleInput.setText(strings[0]);
+                                }
+                                return null;
+                            }
+                        }, progress);
+                    }
                 }
             });
 
